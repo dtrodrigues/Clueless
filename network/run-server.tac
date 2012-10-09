@@ -1,5 +1,5 @@
 from twisted.application import internet, service
-from clueserver import GameProtocol, GameFactory, GameService
+from clueserver import GameServerProtocol, GameFactory, GameService
 
 port = 20000
 interface = '0.0.0.0'
