@@ -3,7 +3,8 @@ import random, datetime
 import pickle as p
 
 # define new exceptions here
-class PlayerException(IOError): pass
+class PlayerError(IOError): pass
+class PlayerCollisionError(IOError): pass
 class EmptyDeckError(AttributeError): pass
 class NoSuchPlayerError(ValueError): pass
 class InvalidMoveError(ValueError): pass
@@ -11,34 +12,62 @@ class GameOverError(ValueError): pass
 class InvalidCoordError(ValueError): pass
 
 
-# some global variables
-scarlet = 0
-mustard = 1
-white   = 2
-green   = 3
-peacock = 4
-plum    = 5
-
-player_order = [scarlet,mustard,white,green,peacock,plum]
+__rooms__ = ['Study','Hall','Lounge','Library','Billiard Room','Dining \
+Room','Conservatory','Ballroom','Kitchen']
+__suspects__ = ['Miss Scarlet','Colonel Mustard','Mrs. White','Mr. Green','Mrs. Peacock','Professor Plum']
+__weapons__ = ['Candlestick','Dagger','Lead Pipe','Revolver','Rope','Wrench']
 
 class game():
 
-    def __init__(self,playerlist):
+    def __init__(self):
         self.board = board()
         self.deck = deck()
-        self.playerlist = playerlist
-        self.numplayers  = len(playerlist)
-        self.current_player = self.playerlist[0]
-        self.disproving_player = self.playerlist[1]
 
-        if (self.numplayers < 2 or self.numplayers > 6):
-            raise PlayerException("Attempted to initialize game with %d \
-players. Invalid number of players.",numplayers)
+        # the hash values will be populated with player objects
+        # as players are added, but for now they are empty
+        self.players = {x:"" for x in __suspects__}
+        self.playerlist = [] # this will make it easier to deal cards
+
+        self.numplayers  = 0
+        self.current_player = ""
+        self.disproving_player = ""
 
         self.solution_cards = self.deck.draw_solution_cards()
 
+        self.ready_to_start = False
         self.turn_number = 0
         self.game_over   = False
+
+    def add_player(self,player):
+
+        if self.numplayers == 6:
+            raise PlayerError("Game already hosting six players. No additional \
+players allowed.")
+
+        if player.suspect not in __suspects__:
+            raise PlayerError("Unknown suspect chosen. Add player failed.")
+        if self.players[player.suspect]:
+            raise PlayerError("This suspect already taken by another player.")
+
+        self.players[player.suspect] = player
+        self.playerlist = self.__players_in_order()
+        self.numplayers += 1
+
+        if self.numplayers > 1:
+            self.ready_to_start = True
+            self.current_player = self.playerlist[0]
+            self.disproving_player = self.playerlist[1]
+
+        return self.ready_to_start
+
+    def __players_in_order(self):
+
+        plist = []
+        for x in __suspects__:
+            if self.players[x]:
+                plist += [self.players[x]]
+
+        return plist
 
     def distribute_remaining_cards(self):
         '''Randomly distrubutes the remaining cards in the deck among all \
@@ -120,16 +149,24 @@ class player():
     def __init__(self,name,suspect,ip_address):
         self.connected = True
         self.name = name
+        if suspect not in __suspects__:
+            raise PlayerError("Invalid suspect.")
+
+        self.suspect = suspect
         self.cards = []
         self.loser = False
         self.ip_address = ip_address
+        self.current_position = ""
 
     def who_am_i(self):
-        return (name,suspect,ip_address)
+        return (self.name,self.suspect,self.ip_address)
 
     def add_card(self,card):
         self.cards += [card]
         return card
+
+    def update_position(self,coordinate):
+        return True
 
     def where_am_i(self):
         return True
@@ -149,6 +186,8 @@ class player():
     def lose_game(self):
         self.loser= True
 
+    def __repr__(self):
+        return '< %s -- %s -- %s >' % (self.name,self.suspect,self.ip_address)
 
 class deck():
 
@@ -156,14 +195,9 @@ class deck():
         # hopefully this will do for our purposes
         random.seed(datetime.datetime.now()) 
 
-        self.rooms = ['Study','Hall','Lounge','Library','Billiard Room','Dining \
-Room','Conservatory','Ballroom','Kitchen']
-        self.suspects = ['Miss Scarlet','Colonel Mustard','Mrs. White','Mr. \
-Green','Mrs. Peacock','Professor Plum']
-        self.weapons = ['Candlestick','Dagger','Lead Pipe','Revolver','Rope','Wrench']
-
-        random.shuffle(self.rooms)
-        random.shuffle(self.suspects)
+        self.rooms = __rooms__
+        self.suspects = __suspects__
+        self.weapons = __weapons__
         random.shuffle(self.weapons)
 
     def draw_solution_cards(self):
@@ -275,7 +309,7 @@ be updated and raises InvalidMoveError otherwise. Updates the board accordingly.
         '''Given a coordinate, returns True if position is empty and \
         False if position is occupied by another player.'''
 
-        if self.board[position[0]][position[1]] == 0:
+        if self.board[coordinate[0]][coordinate[1]] == 0:
             return True
         else:
             return False
