@@ -150,7 +150,54 @@ class Sector():
         self.name = name
         self.font = pygame.font.Font(None, 20)
         self.text = self.font.render(self.name, True, (255,255,255))
+        self.neighbors = []
+        self.addNeighbors()
         
+    def addNeighbors(self):
+        if self.x == 0:
+            if self.y == 0:
+                self.neighbors.extend([(4,4), (1,0), (0,1)])
+            elif self.y == 1:
+                self.neighbors.extend([(0,0), (0,2)])
+            elif self.y == 2:
+                self.neighbors.extend([(0,1), (0,3), (1,2)])
+            elif self.y == 3:
+                self.neighbors.extend([(0,2), (0,4)])
+            else: # self.y == 4
+                self.neighbors.extend([(4,0), (0,3), (1,4)])
+        elif self.x == 1 or self.x == 3:
+            self.neighbors.extend([(self.x-1, self.y), (self.x+1, self.y)])
+        elif self.x == 2:
+            if self.y == 0:
+                self.neighbors.extend([(1,0), (2,1), (3,0)])
+            elif self.y == 1 or self.y == 3:
+                self.neighbors.extend([(self.x, self.y-1), (self.x, self.y+1)])
+            elif self.y == 2:
+                self.neighbors.extend([(1,2), (2,1), (3,2), (2,3)])
+            else: # self.y == 4
+                self.neighbors.extend([(1,4), (3,4), (2,3)])
+        elif self.x == 4:
+            if self.y == 0:
+                self.neighbors.extend([(3,0), (4,1), (0,4)])
+            elif self.y == 1 or self.y == 3:
+                self.neighbors.extend([(4, self.y+1), (4, self.y-1)])
+            elif self.y == 2:
+                self.neighbors.extend([(3,2), (4,1), (4,3)])
+            else: #self.y == 4
+                self.neighbors.extend([(0,0), (3,4), (4,3)])
+                
+        
+    def clicked(self, mouse):
+        if mouse[0] > self.rectangle.topleft[0]:
+            if mouse[1] > self.rectangle.topleft[1]:
+                if mouse[0] < self.rectangle.bottomright[0]:
+                    if mouse[1] < self.rectangle.bottomright[1]:
+                        return True
+                    else: return False
+                else: return False
+            else: return False
+        else: return False
+
 class Room(Sector):
     def __init__(self, x, y, name, passage):
         Sector.__init__(self, x, y, name)
@@ -165,7 +212,7 @@ class Room(Sector):
                                             self.yPos + ROOMHEIGHT - 30, \
                                             30, 30) )
             self.pText = self.font.render("P", True, (255,255,255))
-        
+    
         
         
 
