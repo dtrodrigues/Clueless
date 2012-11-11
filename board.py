@@ -226,5 +226,8 @@ class Hallway(Sector):
         self.hasPassage = False
 
 
-                
-#mygui = Board()
+def main():                
+    mygui = Board()
+    
+if __name__ == '__main__':
+    main()
