@@ -150,16 +150,17 @@ class Character(pygame.sprite.Sprite):
         
 
 def main():
-
-    print ("Available players are:")
-    print ("Mr. Green (green)")
-    print ("Colonel Mustard (mustard)")
-    print ("Mrs. Peacock (peacock)")
-    print ("Professor Plum (plum)")
-    print ("Miss Scarlet (scarlet)")
-    print ("Mrs. White (white)")
     
-    player_name = raw_input("Please select a player:  ")
+    valid_players = ['green', 'mustard', 'peacock', 'plum', 'scarlet', 'white']
+    player_name = ''
+    
+    while player_name not in valid_players:
+    
+        print ("Available players are:")
+        for p in valid_players:
+            print p
+    
+        player_name = raw_input("Please select a player:  ")
         
     player = Character(str(player_name)) #, myBoard.screen)
     start_playing(player)
