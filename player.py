@@ -18,8 +18,6 @@ HALLOFFSET_Y = 80
 XMAX = 4
 YMAX = 4
 
-clock = pygame.time.Clock()
-
 class Opponent(pygame.sprite.Sprite):
     def __init__(self, name):
         pygame.sprite.Sprite.__init__(self)
@@ -102,12 +100,25 @@ class Character(pygame.sprite.Sprite):
 #        pygame.display.flip()
         
     def getOpponents(self):
-        self.opponents.append(Opponent('mustard'))
-        self.opponents.append(Opponent('plum'))
-        self.opponents.append(Opponent('peacock'))
-        self.opponents.append(Opponent('scarlet'))
-        self.opponents.append(Opponent('white'))
-
+        green = Opponent('green')
+        mustard = Opponent('mustard')
+        plum = Opponent('plum')
+        peacock = Opponent('peacock')
+        scarlet = Opponent('scarlet')
+        white = Opponent('white')
+        if self.name != 'mustard':
+            self.opponents.append(mustard)
+        if self.name != 'plum':
+            self.opponents.append(plum)
+        if self.name != 'peacock':
+            self.opponents.append(peacock)
+        if self.name != 'scarlet':
+            self.opponents.append(scarlet)
+        if self.name != 'white':
+            self.opponents.append(white)
+        if self.name != 'green':
+            self.opponents.append(green)
+        
     def getStartingLocation(self):
         if self.name == "scarlet":
             location = board.Sector(3,0,'')
@@ -137,14 +148,28 @@ class Character(pygame.sprite.Sprite):
                                       self.yOffset + self.location.y * ROOMHEIGHT + ROOMOFFSET_Y))
         pygame.display.flip()
         
-#myBoard = board.Board()
-#myBoard.ShowSplash()
 
 def main():
 
-    player = Character("green") #, myBoard.screen)
+    print ("Available players are:")
+    print ("Mr. Green (green)")
+    print ("Colonel Mustard (mustard)")
+    print ("Mrs. Peacock (peacock)")
+    print ("Professor Plum (plum)")
+    print ("Miss Scarlet (scarlet)")
+    print ("Mrs. White (white)")
+    
+    player_name = raw_input("Please select a player:  ")
+        
+    player = Character(str(player_name)) #, myBoard.screen)
+    start_playing(player)
+
+def start_playing(player):
+    
 
     GAMEOVER = False
+
+    clock = pygame.time.Clock()
 
     while not GAMEOVER:
         

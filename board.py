@@ -52,7 +52,6 @@ class Board:
                
 
         self.cells = []
-        self.valid_locations = []
         
         self.ShowMap()
             
@@ -101,10 +100,8 @@ class Board:
                     else:
                         name = "Default"
                     self.cells.append(Room(x, y, name, passage))
-                    self.valid_locations.append(pos)
                 elif x % 2 == 0 or (y % 2 == 0):
                     self.cells.append(Hallway(x,y, "Hallway"))
-                    self.valid_locations.append((x,y))
                 else:
                     name = ''
 
@@ -230,4 +227,4 @@ class Hallway(Sector):
 
 
                 
-mygui = Board()
+#mygui = Board()
