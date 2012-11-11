@@ -131,8 +131,6 @@ class Character(pygame.sprite.Sprite):
     def update(self):
         # Update the display with the locations of all player tokens
         for opponent in self.opponents:
-            opponent.location.x = 2
-            opponent.location.y = 2
             self.screen.blit(opponent.image, (opponent.xOffset + opponent.location.x * ROOMWIDTH + ROOMOFFSET_X, \
                                               opponent.yOffset + opponent.location.y * ROOMHEIGHT + ROOMOFFSET_Y))
         self.screen.blit(self.image, (self.xOffset + self.location.x * ROOMWIDTH + ROOMOFFSET_X,\
