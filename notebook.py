@@ -239,5 +239,3 @@ class Notebook():
         
         self.app.run(self.c)
     
-notebook = Notebook()
-notebook.start()
