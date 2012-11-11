@@ -11,6 +11,8 @@ class InvalidMoveError(ValueError): pass
 class GameOverError(ValueError): pass
 class InvalidCoordError(ValueError): pass
 
+__MIN_PLAYERS__ = 2
+__MAX_PLAYERS__ = 6
 
 __rooms__ = ['Study','Hall','Lounge','Library','Billiard Room','Dining \
 Room','Conservatory','Ballroom','Kitchen']
@@ -50,7 +52,7 @@ players allowed.")
             raise PlayerError("This suspect already taken by another player.")
 
         self.players[player.suspect] = player
-        self.playerlist = self.__players_in_order()
+        self.playerlist = self.players_in_order()
         self.numplayers += 1
 
         if self.numplayers > 1:
@@ -60,7 +62,7 @@ players allowed.")
 
         return self.ready_to_start
 
-    def __players_in_order(self):
+    def players_in_order(self):
 
         plist = []
         for x in __suspects__:
@@ -110,7 +112,7 @@ coordinate. Returns True on success, False otherwise.'''
     def return_board(self):
         pass
 
-    def __check_accusation(self,suggestion):
+    def check_accusation(self,suggestion):
         '''Returns True if the suggestion is correct, False otherwise.'''
         if suggestion == self.solution_cards:
             return True
@@ -121,12 +123,12 @@ coordinate. Returns True on success, False otherwise.'''
         return True
 
     # moves the suspect being accused to the room proposed
-    def __move_player_for_suggestion(self,player):
+    def move_player_for_suggestion(self,player):
         '''Moves the suggested or accused suspect to the room proposed by \
         suggesting or accusing player. Returns True if successful.'''
         return True
 
-    def __correct_room_for_suggestion(self,player):
+    def correct_room_for_suggestion(self,player):
         '''Checks that the suggesting player is in the room before allowing an \
         accusation or suggestion to be made. Returns True if condition is met, 
         False otherwise.'''
@@ -202,7 +204,7 @@ class deck():
 
     def draw_solution_cards(self):
         '''Returns three solution cards (room,suspect,weapon).'''
-        if self.__deck_empty():
+        if self.deck_empty():
             raise EmptyDeckError()
 
         r = self.rooms.pop()
@@ -214,7 +216,7 @@ class deck():
     def return_all_shuffled(self):
         '''Returns a list containing all cards currently in the deck, \
 shuffled.'''
-        if self.__deck_empty():
+        if self.deck_empty():
             return EmptyDeckError()
 
         all_cards = self.rooms + self.suspects + self.weapons
@@ -222,7 +224,7 @@ shuffled.'''
 
         return all_cards
 
-    def __deck_empty(self):
+    def deck_empty(self):
         if len(self.rooms) + len(self.suspects) + len(self.weapons) == 0:
             return True
         else:
@@ -298,14 +300,14 @@ be updated and raises InvalidMoveError otherwise. Updates the board accordingly.
         # raise an exception if not a valid player
         # raise exception if not a valid coordinate
         # raise exception if not a valid move
-        if not self.__validate_move(player,coordinate):
+        if not self.validate_move(player,coordinate):
             raise InvalidMoveError
 
         # if you get here, success, so update the coordinate
         self.player_positions[player] = coordinate
         return True
 
-    def __position_is_empty(self,coordinate):
+    def position_is_empty(self,coordinate):
         '''Given a coordinate, returns True if position is empty and \
         False if position is occupied by another player.'''
 
@@ -314,12 +316,12 @@ be updated and raises InvalidMoveError otherwise. Updates the board accordingly.
         else:
             return False
 
-    def __validate_move(self,player,coordinate):
+    def validate_move(self,player,coordinate):
         '''Given a player and a coordinate, determines whether the \
 proposed move is allowable or not. Returns True if allowable, False if \
 otherwise.'''
         # this means someone is already there, so can't move there
-        if not self.__position_is_empty(coordinate):
+        if not self.position_is_empty(coordinate):
             return False
         # this means it's not actually a space, so can't move there either
         if coordinate in self.not_spaces:
@@ -344,7 +346,7 @@ otherwise.'''
         return True
 
     def room_name(self, coord):
-        self.__valid_coordinate(coord)
+        self.valid_coordinate(coord)
 
         if coord in self.rooms.keys():
             return self.rooms[coord]
@@ -355,7 +357,7 @@ otherwise.'''
         else:
             return "Hallway"
 
-    def __valid_coordinate(self,coord):
+    def valid_coordinate(self,coord):
         '''Private method. Checks that given coordinate is valid form.'''
         if type(coord) != tuple:
             raise ValueError("Invalid parameter provided: parameter must be valid coordinate (x,y)")
