@@ -2,7 +2,7 @@ from twisted.application import internet, service
 from clueserver import GameProtocol, GameFactory, GameService
 
 port = 20000
-interface = 'localhost'
+interface = '0.0.0.0'
 
 top_service = service.MultiService()
 
