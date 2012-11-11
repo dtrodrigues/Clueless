@@ -50,6 +50,9 @@ class Board:
         self.btn_accuse = button.Button('button_accuse')
         self.btn_exit = button.Button('button_close')
                
+
+        self.cells = []
+        self.valid_locations = []
         
         self.ShowMap()
             
@@ -68,7 +71,6 @@ class Board:
         
             
     def ShowMap(self):
-        self.cells = []
         for x in range(0,5):
             for y in range(0,5):
                 passage = False
@@ -99,8 +101,10 @@ class Board:
                     else:
                         name = "Default"
                     self.cells.append(Room(x, y, name, passage))
+                    self.valid_locations.append(pos)
                 elif x % 2 == 0 or (y % 2 == 0):
                     self.cells.append(Hallway(x,y, "Hallway"))
+                    self.valid_locations.append((x,y))
                 else:
                     name = ''
 
