@@ -1,8 +1,12 @@
 #!/usr/local/bin/python2.7
 
 import pygame
+from pgu import gui
+
 import time
 from pygame.locals import *
+
+import button
 
 # Some constants
 
@@ -32,7 +36,7 @@ class Board:
         pygame.init()
         
         pygame.display.set_caption('Clued-In')
-        self.screen = pygame.display.set_mode((900,750))
+        self.screen = pygame.display.set_mode((1000,750), pygame.DOUBLEBUF)
         GAMEOVER = False
         
         self.background = pygame.Surface(self.screen.get_size())
@@ -41,20 +45,26 @@ class Board:
         self.screen.blit(self.background, (0,0))
         pygame.display.flip()
         
+        self.btn_notebook = button.Button('button_notebook')
+        self.btn_suggest = button.Button('button_suggest')
+        self.btn_accuse = button.Button('button_accuse')
+        self.btn_exit = button.Button('button_close')
                
+        
+        self.ShowMap()
+            
+           
+#        while not GAMEOVER:
+#            for event in pygame.event.get():
+#                if event.type == pygame.QUIT:
+#                    GAMEOVER = True
+    
+    def ShowSplash(self):
         splashImg = pygame.image.load('images/splash_screen.png')
         
         self.screen.blit(splashImg, (50,50))
         pygame.display.flip()
         time.sleep(2)
-        
-        self.ShowMap()
-            
-           
-        while not GAMEOVER:
-            for event in pygame.event.get():
-                if event.type == pygame.QUIT:
-                    GAMEOVER = True
         
             
     def ShowMap(self):
@@ -75,7 +85,7 @@ class Board:
                     elif pos == (0, 2):
                         name = "Library"
                     elif pos == (2, 2):
-                        name = "Billard Room"
+                        name = "Billiard Room"
                     elif pos == (4, 2):
                         name = "Dining Room"
                     elif pos == (0, 4):
@@ -94,11 +104,8 @@ class Board:
                 else:
                     name = ''
 
-
         # clear the screen first
-        
-        
-
+                
         for cell in self.cells:
             
             pygame.draw.rect(self.background, cell.color, cell.rectangle, 0)
@@ -108,10 +115,30 @@ class Board:
                 self.background.blit(cell.pText, cell.pRectangle)
         
         
+        # Add event buttons button
+        self.btn_notebook.setCords(ROOMWIDTH * 6.5, ROOMHEIGHT * 3)
+        self.btn_suggest.setCords(ROOMWIDTH * 6.5, ROOMHEIGHT * 3.5)
+        self.btn_accuse.setCords(ROOMWIDTH * 6.5, ROOMHEIGHT * 4)
+        self.btn_exit.setCords(ROOMWIDTH * 6.5, ROOMHEIGHT * 5)
+        
+        self.background.blit(self.btn_notebook.image, self.btn_notebook.rect.topleft)
+        self.background.blit(self.btn_suggest.image, self.btn_suggest.rect.topleft)
+        self.background.blit(self.btn_accuse.image, self.btn_accuse.rect.topleft)
+        self.background.blit(self.btn_exit.image, self.btn_exit.rect.topleft)
+        pygame.display.flip()
+        
         self.screen.blit( self.background, (0,0) )
         pygame.display.flip()
         
         
+class Quit(gui.Button):
+    def __init__(self, **params):
+        params['value'] = 'Quit'
+        gui.Button.__init__(self,**params)
+        self.connect(gui.CLICK, app.quit, None)
+
+
+
 class Sector():
     def __init__(self, x, y, name):
         self.x = x
