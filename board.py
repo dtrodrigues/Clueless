@@ -7,6 +7,7 @@ import time
 from pygame.locals import *
 
 import button
+from sector import *
 
 # Some constants
 
@@ -53,14 +54,20 @@ class Board:
 
         self.cells = []
         
+        self.rooms = {(0,0):"Study",
+                      (0,2):"Libary",
+                      (0,4):"Conservatory",
+                      (2,0):"Hall",
+                      (2,2):"Billiard Room",
+                      (2,4):"Ballroom",
+                      (4,0):"Lounge",
+                      (4,2):"Dining Room",
+                      (4,4):"Kitchen"
+                     }
+        
         self.ShowMap()
-            
-           
-#        while not GAMEOVER:
-#            for event in pygame.event.get():
-#                if event.type == pygame.QUIT:
-#                    GAMEOVER = True
-    
+        
+               
     def ShowSplash(self):
         splashImg = pygame.image.load('images/splash_screen.png')
         
@@ -73,7 +80,8 @@ class Board:
         for x in range(0,5):
             for y in range(0,5):
                 passage = False
-                if x % 2 == 0 and (y % 2 == 0):       # This is a Room
+#                if x % 2 == 0 and (y % 2 == 0):       # This is a Room
+                if (x,y) in self.rooms.keys():         # This is a room
                     pos = (x,y)
                     if pos == (0, 0):
                         name = "Study"
@@ -140,90 +148,6 @@ class Quit(gui.Button):
 
 
 
-class Sector():
-    def __init__(self, x, y, name):
-        self.x = x
-        self.y = y
-        self.name = name
-        self.font = pygame.font.Font(None, 20)
-        self.text = self.font.render(self.name, True, (255,255,255))
-        self.neighbors = []
-        self.addNeighbors()
-        
-    def addNeighbors(self):
-        if self.x == 0:
-            if self.y == 0:
-                self.neighbors.extend([(4,4), (1,0), (0,1)])
-            elif self.y == 1:
-                self.neighbors.extend([(0,0), (0,2)])
-            elif self.y == 2:
-                self.neighbors.extend([(0,1), (0,3), (1,2)])
-            elif self.y == 3:
-                self.neighbors.extend([(0,2), (0,4)])
-            else: # self.y == 4
-                self.neighbors.extend([(4,0), (0,3), (1,4)])
-        elif self.x == 1 or self.x == 3:
-            self.neighbors.extend([(self.x-1, self.y), (self.x+1, self.y)])
-        elif self.x == 2:
-            if self.y == 0:
-                self.neighbors.extend([(1,0), (2,1), (3,0)])
-            elif self.y == 1 or self.y == 3:
-                self.neighbors.extend([(self.x, self.y-1), (self.x, self.y+1)])
-            elif self.y == 2:
-                self.neighbors.extend([(1,2), (2,1), (3,2), (2,3)])
-            else: # self.y == 4
-                self.neighbors.extend([(1,4), (3,4), (2,3)])
-        elif self.x == 4:
-            if self.y == 0:
-                self.neighbors.extend([(3,0), (4,1), (0,4)])
-            elif self.y == 1 or self.y == 3:
-                self.neighbors.extend([(4, self.y+1), (4, self.y-1)])
-            elif self.y == 2:
-                self.neighbors.extend([(3,2), (4,1), (4,3)])
-            else: #self.y == 4
-                self.neighbors.extend([(0,0), (3,4), (4,3)])
-                
-        
-    def clicked(self, mouse):
-        if mouse[0] > self.rectangle.topleft[0]:
-            if mouse[1] > self.rectangle.topleft[1]:
-                if mouse[0] < self.rectangle.bottomright[0]:
-                    if mouse[1] < self.rectangle.bottomright[1]:
-                        return True
-                    else: return False
-                else: return False
-            else: return False
-        else: return False
-
-class Room(Sector):
-    def __init__(self, x, y, name, passage):
-        Sector.__init__(self, x, y, name)
-        self.xPos = ROOMOFFSET_X + self.x*ROOMWIDTH
-        self.yPos = ROOMOFFSET_Y + self.y*ROOMHEIGHT
-        self.rectangle = pygame.Rect( (self.xPos, self.yPos, ROOMWIDTH, \
-                                       ROOMHEIGHT) )
-        self.color = (150, 150, 200)
-        self.hasPassage = passage
-        if self.hasPassage:
-            self.pRectangle = pygame.Rect( (self.xPos + ROOMWIDTH - 30, \
-                                            self.yPos + ROOMHEIGHT - 30, \
-                                            30, 30) )
-            self.pText = self.font.render("P", True, (255,255,255))
-    
-        
-        
-
-class Hallway(Sector):
-    def __init__(self, x, y, name=""):
-        Sector.__init__(self, x, y, name)
-        if x % 2 == 1:
-            # Vertical Hallway
-            self.rectangle = pygame.Rect( (ROOMOFFSET_X + x*128, HALLOFFSET_Y + y*128, ROOMWIDTH, HALLHEIGHT) ) 
-        else:
-            # Horizontal Hallway
-            self.rectangle = pygame.Rect( (HALLOFFSET_X + x*128, ROOMOFFSET_Y + y*128, HALLWIDTH, ROOMHEIGHT) )
-        self.color = (50, 50, 50)
-        self.hasPassage = False
 
 
 def main():                
