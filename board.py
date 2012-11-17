@@ -7,6 +7,7 @@ import time
 from pygame.locals import *
 
 import button
+from sector import *
 
 # Some constants
 
@@ -52,16 +53,21 @@ class Board:
                
 
         self.cells = []
-        self.valid_locations = []
+        
+        self.rooms = {(0,0):"Study",
+                      (0,2):"Libary",
+                      (0,4):"Conservatory",
+                      (2,0):"Hall",
+                      (2,2):"Billiard Room",
+                      (2,4):"Ballroom",
+                      (4,0):"Lounge",
+                      (4,2):"Dining Room",
+                      (4,4):"Kitchen"
+                     }
         
         self.ShowMap()
-            
-           
-#        while not GAMEOVER:
-#            for event in pygame.event.get():
-#                if event.type == pygame.QUIT:
-#                    GAMEOVER = True
-    
+        
+               
     def ShowSplash(self):
         splashImg = pygame.image.load('images/splash_screen.png')
         
@@ -74,7 +80,8 @@ class Board:
         for x in range(0,5):
             for y in range(0,5):
                 passage = False
-                if x % 2 == 0 and (y % 2 == 0):       # This is a Room
+#                if x % 2 == 0 and (y % 2 == 0):       # This is a Room
+                if (x,y) in self.rooms.keys():         # This is a room
                     pos = (x,y)
                     if pos == (0, 0):
                         name = "Study"
@@ -101,10 +108,8 @@ class Board:
                     else:
                         name = "Default"
                     self.cells.append(Room(x, y, name, passage))
-                    self.valid_locations.append(pos)
                 elif x % 2 == 0 or (y % 2 == 0):
                     self.cells.append(Hallway(x,y, "Hallway"))
-                    self.valid_locations.append((x,y))
                 else:
                     name = ''
 
@@ -143,44 +148,10 @@ class Quit(gui.Button):
 
 
 
-class Sector():
-    def __init__(self, x, y, name):
-        self.x = x
-        self.y = y
-        self.name = name
-        self.font = pygame.font.Font(None, 20)
-        self.text = self.font.render(self.name, True, (255,255,255))
-        
-class Room(Sector):
-    def __init__(self, x, y, name, passage):
-        Sector.__init__(self, x, y, name)
-        self.xPos = ROOMOFFSET_X + self.x*ROOMWIDTH
-        self.yPos = ROOMOFFSET_Y + self.y*ROOMHEIGHT
-        self.rectangle = pygame.Rect( (self.xPos, self.yPos, ROOMWIDTH, \
-                                       ROOMHEIGHT) )
-        self.color = (150, 150, 200)
-        self.hasPassage = passage
-        if self.hasPassage:
-            self.pRectangle = pygame.Rect( (self.xPos + ROOMWIDTH - 30, \
-                                            self.yPos + ROOMHEIGHT - 30, \
-                                            30, 30) )
-            self.pText = self.font.render("P", True, (255,255,255))
-        
-        
-        
-
-class Hallway(Sector):
-    def __init__(self, x, y, name=""):
-        Sector.__init__(self, x, y, name)
-        if x % 2 == 1:
-            # Vertical Hallway
-            self.rectangle = pygame.Rect( (ROOMOFFSET_X + x*128, HALLOFFSET_Y + y*128, ROOMWIDTH, HALLHEIGHT) ) 
-        else:
-            # Horizontal Hallway
-            self.rectangle = pygame.Rect( (HALLOFFSET_X + x*128, ROOMOFFSET_Y + y*128, HALLWIDTH, ROOMHEIGHT) )
-        self.color = (50, 50, 50)
-        self.hasPassage = False
 
 
-                
-mygui = Board()
+def main():                
+    mygui = Board()
+    
+if __name__ == '__main__':
+    main()

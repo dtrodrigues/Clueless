@@ -3,7 +3,8 @@ from pygame.locals import *
 
 from pgu import gui
 
-import board, notebook
+import board, notebook, player_selection, suggestion, accusation
+from sector import Sector
 
 ROOMWIDTH = 128
 ROOMHEIGHT = 128
@@ -17,8 +18,6 @@ HALLOFFSET_Y = 80
 
 XMAX = 4
 YMAX = 4
-
-clock = pygame.time.Clock()
 
 class Opponent(pygame.sprite.Sprite):
     def __init__(self, name):
@@ -48,17 +47,17 @@ class Opponent(pygame.sprite.Sprite):
 
     def getStartingLocation(self):
         if self.name == "scarlet":
-            location = board.Sector(3,0,"")
+            location = Sector(3,0,'')
         elif self.name == 'green':
-            location = board.Sector(1,4,'')
+            location = Sector(1,4,'')
         elif self.name == 'mustard':
-            location = board.Sector(4,1,'')
+            location = Sector(4,1,'')
         elif self.name == 'peacock':
-            location = board.Sector(0,3,'')
+            location = Sector(0,3,'')
         elif self.name == 'plum':
-            location = board.Sector(0,1,'')
+            location = Sector(0,1,'')
         else: # White
-            location = board.Sector(3,4,"")
+            location = Sector(3,4,"")
         return location
 
 
@@ -86,98 +85,153 @@ class Character(pygame.sprite.Sprite):
             self.yOffset = 50
         
         self.board = board.Board()
-        self.board.ShowSplash()
+        #self.board.ShowSplash()
         self.screen = self.board.screen
-        self.location = self.getStartingLocation()
+        self.getStartingLocation()
         
         self.image = pygame.image.load("images/"+name+".png")
         self.rect = self.image.get_rect()
 
-        self.opponents = []
+        self.opponents = {}
         self.getOpponents()
 
-#        self.nb_surface = pygame.Surface((400,640))
         self.notebook = notebook.Notebook() #self.nb_surface)
-#        self.screen.blit(self.nb_surface,(100,100))
-#        pygame.display.flip()
+
+        self.suggestion = suggestion.Suggestion()
+        self.accusation = accusation.Accusation()
         
     def getOpponents(self):
-        self.opponents.append(Opponent('mustard'))
-        self.opponents.append(Opponent('plum'))
-        self.opponents.append(Opponent('peacock'))
-        self.opponents.append(Opponent('scarlet'))
-        self.opponents.append(Opponent('white'))
-
+        green = Opponent('green')
+        mustard = Opponent('mustard')
+        plum = Opponent('plum')
+        peacock = Opponent('peacock')
+        scarlet = Opponent('scarlet')
+        white = Opponent('white')
+        if self.name != 'mustard':
+            self.opponents['mustard'] = (mustard)
+        if self.name != 'plum':
+            self.opponents['plum'] = (plum)
+        if self.name != 'peacock':
+            self.opponents['peacock'] = (peacock)
+ #       if self.name != 'scarlet':
+ #           self.opponents.append(scarlet)
+        #if self.name != 'white':
+            #self.opponents.append(white)
+        #if self.name != 'green':
+         #   self.opponents.append(green)
+        
     def getStartingLocation(self):
         if self.name == "scarlet":
-            location = board.Sector(3,0,"")
+            self.location = Sector(3,0,'')
         elif self.name == 'green':
-            location = board.Sector(1,4,'')
+            self.location = Sector(1,4,'')
         elif self.name == 'mustard':
-            location = board.Sector(4,1,'')
+            self.location = Sector(4,1,'')
         elif self.name == 'peacock':
-            location = board.Sector(0,3,'')
+            self.location = Sector(0,3,'')
         elif self.name == 'plum':
-            location = board.Sector(0,1,'')
+            self.location = Sector(0,1,'')
         else: # White
-            location = board.Sector(3,4,"")
-        return location
+            self.location = Sector(3,4,'')
+        
     
     def move(self, requested_location):
-        if requested_location in self.board.valid_locations:
-            self.location.x = requested_location[0]
-            self.location.y = requested_location[1]
+        #if requested_location in self.board.valid_locations:
+        if requested_location in self.location.neighbors:
+            self.location.update(requested_location[0], requested_location[1])
+
+    def make_suggestion(self):
+        if self.location.pos in self.board.rooms.keys():
+            room = self.board.rooms[self.location.pos]
+            self.suggestion.create(room)
+            suspect = self.suggestion.suspect.value
+            weapon = self.suggestion.weapon.value
+            if suspect in self.opponents.keys():
+                self.opponents[suspect].location.update(self.location.x, self.location.y)
+            self.update()
+            
+    def make_accusation(self):
+        if self.location.pos in self.board.rooms.keys():
+            self.accusation.create()
+            suspect = self.accusation.suspect.value
+            weapon = self.accusation.weapon.value
+            room = self.accusation.room.value
 
     def update(self):
         # Update the display with the locations of all player tokens
-        for opponent in self.opponents:
+        for opponent in self.opponents.values():
             self.screen.blit(opponent.image, (opponent.xOffset + opponent.location.x * ROOMWIDTH + ROOMOFFSET_X, \
                                               opponent.yOffset + opponent.location.y * ROOMHEIGHT + ROOMOFFSET_Y))
         self.screen.blit(self.image, (self.xOffset + self.location.x * ROOMWIDTH + ROOMOFFSET_X,\
                                       self.yOffset + self.location.y * ROOMHEIGHT + ROOMOFFSET_Y))
         pygame.display.flip()
         
-#myBoard = board.Board()
-#myBoard.ShowSplash()
 
-player = Character("green") #, myBoard.screen)
-
-GAMEOVER = False
-
-while not GAMEOVER:
+def main():
     
-    clock.tick(120)
+    valid_players = ['green', 'mustard', 'peacock', 'plum', 'scarlet', 'white']
+    player_name = ''
     
-    for event in pygame.event.get():
-        if event.type == pygame.QUIT:
-            GAMEOVER = True
-        elif event.type == KEYDOWN and event.key == K_RIGHT:
-            player.move((player.location.x+1, player.location.y))
-        elif event.type == KEYDOWN and event.key == K_LEFT:
-            player.move((player.location.x-1, player.location.y))
-        elif event.type == KEYDOWN and event.key == K_UP:
-            player.move((player.location.x, player.location.y-1))
-        elif event.type == KEYUP and event.key == K_DOWN:
-            player.move((player.location.x, player.location.y+1))
-        elif event.type == KEYDOWN and event.key == K_p:
-            if player.location.x == 0 and player.location.y == 0:
-                player.move((XMAX, YMAX))
-            elif player.location.x == 0 and player.location.y == YMAX:
-                player.move((XMAX, 0))
-            elif player.location.x == XMAX and player.location.y == 0:
-                player.move((0, YMAX))
-            elif player.location.x == XMAX and player.location.y == YMAX:
-                player.move((0, 0))
-        elif event.type == MOUSEBUTTONUP:
-            mouse = pygame.mouse.get_pos()
-            #if myBoard.btn_exit.pressed(mouse):	#Exit the game
-            if player.board.btn_exit.pressed(mouse):
+    while player_name not in valid_players:
+    
+        p = player_selection.PlayerSelection()
+        p.start()
+        player_name = p.p.value
+        
+    player = Character(str(player_name)) #, myBoard.screen)
+    start_playing(player)
+
+def start_playing(player):
+    
+
+    GAMEOVER = False
+
+    clock = pygame.time.Clock()
+
+    while not GAMEOVER:
+        
+        clock.tick(120)
+        
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
                 GAMEOVER = True
-            elif player.board.btn_notebook.pressed(mouse): # View Notebook
-                player.notebook.start()
-    player.screen.blit( player.board.background, (0,0) )
-    player.update()
-    pygame.display.flip()
+            elif event.type == KEYDOWN and event.key == K_RIGHT:
+                player.move((player.location.x+1, player.location.y))
+            elif event.type == KEYDOWN and event.key == K_LEFT:
+                player.move((player.location.x-1, player.location.y))
+            elif event.type == KEYDOWN and event.key == K_UP:
+                player.move((player.location.x, player.location.y-1))
+            elif event.type == KEYUP and event.key == K_DOWN:
+                player.move((player.location.x, player.location.y+1))
+            elif event.type == KEYDOWN and event.key == K_p:
+                if player.location.x == 0 and player.location.y == 0:
+                    player.move((XMAX, YMAX))
+                elif player.location.x == 0 and player.location.y == YMAX:
+                    player.move((XMAX, 0))
+                elif player.location.x == XMAX and player.location.y == 0:
+                    player.move((0, YMAX))
+                elif player.location.x == XMAX and player.location.y == YMAX:
+                    player.move((0, 0))
+            elif event.type == MOUSEBUTTONUP:
+                mouse = pygame.mouse.get_pos()
+                if player.board.btn_exit.pressed(mouse):        # Exit game
+                    GAMEOVER = True
+                if player.board.btn_notebook.pressed(mouse): # View Notebook
+                    player.notebook.start()
+                if player.board.btn_suggest.pressed(mouse): # Make a Suggestion
+                    player.make_suggestion()
+                if player.board.btn_accuse.pressed(mouse): # Make an Accusation
+                    player.make_accusation()
+                for cell in player.board.cells:
+                    if cell.clicked(mouse):
+                        player.move((cell.x, cell.y))
+
+        player.screen.blit( player.board.background, (0,0) )
+        player.update()
+        pygame.display.flip()
     
 
-sys.exit()
+    sys.exit()
+
+if __name__ == '__main__':
+    main()
