@@ -1,0 +1,108 @@
+Here are some rough, but hopefully adequate specs for the server and message classes:
+
+MESSAGE
+
+The message class only has a constructor:
+
+message.Message(direction,type,info,new_turn,comment)
+
+-direction indicates whether the message is to or from the server
+-type indicates what purpose the message servers: more on this later
+-info is a dictionary that contains necessary information to carry out the behavior
+-new_turn indicates whether a new turn is beginning:
+	if a new turn is beginning, new_turn equals the name of the suspect whose turn it is
+	new_turn defaults to False, so it should be simple to check whether there's a new turn or not
+-comment is just a string explaining what's going on, no need for this to be used other than for debugging
+
+there are some global variables that can be used for the sake of clarity:
+direction can be set to FROM_SERVER or TO_SERVER
+keep in mind that all messages from the server will go to ALL clients, it shouldn't need to be more precise than that
+
+I've built some basic error checking into this, so for example if it's not your turn and you try to make a suggestion/accusation or something,
+the server will raise an Ignore error. I'm not sure how this should be handled, or if it needs to be handled at all, but it seems like something to think about at least
+
+types are broken down into types from the server and types to the server:
+
+TO_SERVER types
+	START_GAME
+		some client is going to need to issue this message in order for the game to begin (once all players are in place)
+	ADD_ME
+		indicates that a client is going to be added
+		info['name'] = name of player (e.g. Dan)
+		info['suspect'] = name of suspect (e.g. Colonel Mustard)
+	MAKE_MOVE
+		indicates that a client is making a move
+		info['suspect'] = name of suspect
+		info['coord']   = the coordinate of the move
+	MAKE_SUGGESTION
+		indicates that a client is making a suggestion
+		info['suspect'] = name of suspect
+		info['suggestion'] = tuple(room,suspect,weapon)
+	MAKE_ACCUSATION
+		indicates that a client is making an accusation
+		info['suspect'] = name of suspect
+		info['accusation'] = tuple(room,suspect,weapon)
+	DISPROVE
+		indicates the card that is being used to disprove
+		info['suspect'] = name of disproving suspect
+		info['card']	= name of card being used to disprove
+
+FROM_SERVER types
+	START
+		indicates the game is beginning (all players have been added)
+		this is how the cards will be distributed to all players
+		info[suspect_name] = cards
+			info is simply a dictionary that is keyed with suspect names and contains arrays of the cards
+			No cheating!
+	ADD_PLAYER
+		indicates a player has been added to the game
+		info['name'] = player name
+		info['suspect'] = suspect name
+		info['remaining'] = an array of the remaining suspect names
+	MADE_MOVE
+		indicates a player has made a move
+		info['suspect'] = suspect name
+		info['board']  = a pickle of the board object (using pickle.dumps()) 
+		info['success'] = True if a valid move, False if otherwise (hopefully we won't actually need this)
+	WON_GAME
+		indicates a player made an accusation and they won
+		info['suspect'] = suspect name
+		info['accusation'] = tuple(room,suspect,weapon)
+		info['board'] = pickle of the updated board
+		info['gameover']  = True
+	LOST_GAME
+		indicates a player made an accusation and they lost
+		info['suspect'] = suspect name
+		info['accusation'] = tuple(room,suspect,weapon)
+		info['board'] = pickle of the updated board
+		info['gameover'] = False
+	MADE_SUGGESTION
+		indicates a player made a suggestion
+		info['suspect'] = name of the suspect that made the suggestion
+		info['suggestion'] = the suggestion that was made tuple(room,suspect,weapon)
+		info['can_disprove'] = suspect name or False -- if false, the suggestion can't be disproved
+		info['board'] = pickle of the updated board
+	WAS_DISPROVED
+		info['suspect'] = the suspect who disproved
+		info['card']	= the card used to disprove 
+
+I'm trying to make these messages as minimal as possible so that we don't have to send very much information. So, for example,
+the LOST_GAME message should be enough to indicate to all players what the accusation was, should indicate to the accusing player
+that they lost, and should have the new_turn parameter set so that the next turn can proceed. Does this make sense?
+
+Also, I know there's a lot of redundancy built into this, but at this point I think we just need to get it to work.
+	
+
+
+
+SERVER
+
+The server has only one method other than its constructor
+
+s = server.Server()
+s.invoke(message)
+
+message will be a pickled message: use pickle.dumps() to pickle as a string
+there is a decision structure in place that depends on the kind of message that is received and the information it contains
+the decision structure should be adequate for all game behavior (hopefully)
+I'm hoping to keep this minimal at the moment, hopefully that will be okay for our purposes

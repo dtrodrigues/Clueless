@@ -1,9 +1,10 @@
 #!/usr/bin/env python
 import random, datetime
-import pickle as p
+import pickle
 
 # define new exceptions here
 class PlayerError(IOError): pass
+class NotReadyError(AttributeError): pass
 class PlayerCollisionError(IOError): pass
 class EmptyDeckError(AttributeError): pass
 class NoSuchPlayerError(ValueError): pass
@@ -14,13 +15,24 @@ class InvalidCoordError(ValueError): pass
 __MIN_PLAYERS__ = 2
 __MAX_PLAYERS__ = 6
 
-__rooms__ = ['Study','Hall','Lounge','Library','Billiard Room','Dining \
-Room','Conservatory','Ballroom','Kitchen']
-__suspects__ = ['Miss Scarlet','Colonel Mustard','Mrs. White','Mr. Green','Mrs. Peacock','Professor Plum']
+__rooms__ = ['Study','Hall','Lounge','Library','Billiard Room','Dining Room',
+'Conservatory','Ballroom','Kitchen']
+__suspects__ = ['Miss Scarlet','Colonel Mustard','Mrs. White','Mr. Green','Mrs. Peacock', 'Professor Plum']
 __weapons__ = ['Candlestick','Dagger','Lead Pipe','Revolver','Rope','Wrench']
+
+
+###################################################################
+#
+#   CLASS: game
+#
+#
+###################################################################
 
 class game():
 
+#
+#   INIT
+#
     def __init__(self):
         self.board = board()
         self.deck = deck()
@@ -29,10 +41,11 @@ class game():
         # as players are added, but for now they are empty
         self.players = {x:"" for x in __suspects__}
         self.playerlist = [] # this will make it easier to deal cards
+        self.available_suspects = [x for x in __suspects__]
 
         self.numplayers  = 0
         self.current_player = ""
-        self.disproving_player = ""
+        self.losers = []
 
         self.solution_cards = self.deck.draw_solution_cards()
 
@@ -40,6 +53,9 @@ class game():
         self.turn_number = 0
         self.game_over   = False
 
+#
+#   ADD PLAYER
+#
     def add_player(self,player):
 
         if self.numplayers == 6:
@@ -53,15 +69,18 @@ players allowed.")
 
         self.players[player.suspect] = player
         self.playerlist = self.players_in_order()
+        self.available_suspects.remove(player.suspect)
         self.numplayers += 1
 
         if self.numplayers > 1:
             self.ready_to_start = True
-            self.current_player = self.playerlist[0]
-            self.disproving_player = self.playerlist[1]
+            self.current_player = self.playerlist[0].suspect
 
         return self.ready_to_start
 
+#
+#   PLAYERS IN ORDER
+#
     def players_in_order(self):
 
         plist = []
@@ -82,6 +101,10 @@ players.'''
 
         return True
 
+
+#
+#   NEXT TURN
+#
     def next_turn(self):
         '''Advances the state of the game to the next turn. Raises an \
 exception if the game is over. Returns True on success.'''
@@ -89,14 +112,68 @@ exception if the game is over. Returns True on success.'''
         if self.game_over:
             raise GameOverError("Cannot make new move: game is already over.")
 
-        self.turn_number += 1 
-        self.current_player = self.playerlist[self.turn_number %
-self.numplayers]
-        self.disproving_player = self.playerlist[(self.turn_number+1) %
-self.numplayers]
+        # this needs to account for the possibility that a player has already
+        # lost
+        self.next_player()
+        self.turn_number += 1
 
-        return True
+        # return the new suspect
+        return self.current_player
 
+
+
+    def next_player(self):
+
+        if len(self.losers) >= self.numplayers -1:
+            return False 
+
+        current = 0
+        for x in range(self.numplayers):
+            if self.playerlist[x].suspect == self.current_player:
+                current = x
+                break
+
+        x = 0
+        while(x < self.numplayers-1):
+
+            current = (current + 1) % self.numplayers
+            if self.playerlist[current].suspect in self.losers:
+                x += 1
+                continue
+
+            else:
+                self.current_player = self.playerlist[current].suspect
+                return self.current_player
+
+        return False
+
+
+    def who_can_disprove(self,suggestion):
+
+        current = 0
+        for x in range(self.numplayers):
+            if self.playerlist[x].suspect == self.current_player:
+                current = x
+                break
+
+        x = 0
+        while(x < self.numplayers-1):
+
+            current = (current + 1) % self.numplayers
+            for card in self.playerlist[current].cards:
+                if card in suggestion:
+                    return self.playerlist[current].suspect
+
+            # otherwise, continue
+            x += 1
+            continue
+
+        # no one can disprove
+        return False 
+
+#
+#   UPDATE PLAYER POSITION
+#
     def update_player_position(self,player,coordinate):
         '''Updates the position of the player on the board with the given \
 coordinate. Returns True on success, False otherwise.'''
@@ -109,46 +186,88 @@ coordinate. Returns True on success, False otherwise.'''
         except InvalidMoveError, errmsg:
             return False
 
-    def return_board(self):
-        pass
 
-    def check_accusation(self,suggestion):
+#
+#   PICKLE BOARD
+#
+    def pickle_board(self):
+        '''Returns the board as a Pickle.'''
+        return pickle.dumps(self.board)
+
+#
+#   CHECK SUGGESTION
+#
+    def check_suggestion(self,suggestion):
+
+        room = suggestion[0]
+        suspect = suggestion[1]
+        weapon = suggestion[2]
+
+        # move suspected player to the correct room
+        self.board.move_player_to_room(suspect,room)
+
+        return self.who_can_disprove(suggestion)
+
+
+
+#
+#   CHECK ACCUSATION
+#
+    def check_accusation(self,accusation):
         '''Returns True if the suggestion is correct, False otherwise.'''
+
+        room = accusation[0]
+        suspect = accusation[1]
+        weapon = accusation[2]
+
+        # move the accused suspect to the correct room
+        self.board.move_player_to_room(suspect,room)
+
         if suggestion == self.solution_cards:
             return True
         else:
             return False
 
-    def check_suggestion(self):
-        return True
-
-    # moves the suspect being accused to the room proposed
-    def move_player_for_suggestion(self,player):
-        '''Moves the suggested or accused suspect to the room proposed by \
-        suggesting or accusing player. Returns True if successful.'''
-        return True
-
+#
+#   CORRECT ROOM FOR SUGGESTION OR ACCUSATION
+#
     def correct_room_for_suggestion(self,player):
-        '''Checks that the suggesting player is in the room before allowing an \
+        '''Checks that the suggesting player is in the room before allowing an 
         accusation or suggestion to be made. Returns True if condition is met, 
         False otherwise.'''
         return True
 
-    def declare_loser(self):
+#
+#   DECLARE LOSER
+#
+    def declare_loser(self,suspect):
+        self.losers += [suspect]
         return True
 
+#
+#   DECLARE WINNER
+#
     def declare_winner(self):
         return True
 
+
+#
+#   END GAME
+#
     def end_game(self):
         self.game_over = True
         return True
 
-
+##############################################################
+#
+#   CLASS: player
+#
+#
+##############################################################
 
 class player():
 
-    def __init__(self,name,suspect,ip_address):
+    def __init__(self,name,suspect,ip_address=None,port=None):
         self.connected = True
         self.name = name
         if suspect not in __suspects__:
@@ -158,6 +277,7 @@ class player():
         self.cards = []
         self.loser = False
         self.ip_address = ip_address
+        self.port = port
         self.current_position = ""
 
     def who_am_i(self):
@@ -167,29 +287,29 @@ class player():
         self.cards += [card]
         return card
 
-    def update_position(self,coordinate):
-        return True
-
-    def where_am_i(self):
-        return True
-
-    def make_move(self):
-        pass
-
-    def make_suggestion(self,suspect,weapon,room):
-        pass
-
-    def make_accusation(self,suspect,weapon,room):
-        pass
-
     def can_disprove(self,suspect,weapon,room):
-        return True
+
+        if suspect in self.cards:
+            return True
+        elif weapon in self.cards:
+            return True
+        elif room in self.cards:
+            return True
+        else:
+            return False
 
     def lose_game(self):
         self.loser= True
 
     def __repr__(self):
         return '< %s -- %s -- %s >' % (self.name,self.suspect,self.ip_address)
+
+################################################################
+#
+#   CLASS: deck
+#
+#
+################################################################
 
 class deck():
 
@@ -198,7 +318,7 @@ class deck():
         random.seed(datetime.datetime.now()) 
 
         self.rooms = __rooms__
-        self.suspects = __suspects__
+        self.suspects = [x for x in __suspects__]
         self.weapons = __weapons__
         random.shuffle(self.weapons)
 
@@ -230,32 +350,12 @@ shuffled.'''
         else:
             return False
 
-class coord():
-    '''The entire purpose of this class is to make it impossible to define an \
-invalid coordinate.'''
-
-    def __init__(self,x,y):
-        self.min_xy = 0
-        self.max_xy = 4
-        self.invalid_coords = [(1,1),(1,3),(3,1),(3,3)]
-
-        if x < self.min_xy:
-            raise InvalidCoordError("X value less than minimum x value of 0.")
-        if x > self.max_xy:
-            raise InvalidCoordError("X value greater than max x value of 4.")
-        if y < self.min_xy:
-            raise InvalidCoordError("Y value less than minimum y value of 0.")
-        if y > self.max_xy:
-            raise InvalidCoordError("Y value greater than max y value of 4.")
-        if (x,y) in self.invalid_coords:
-            raise InvalidCoordError("Coordinate given is not a valid position \
-on the board.")
-
-        self.x = x
-        self.y = y
-
-    def return_tuple(self):
-        return (x,y)
+##################################################################
+#
+#   CLASS: board
+#
+#
+##################################################################
 
 class board():
 
@@ -278,12 +378,12 @@ class board():
                      } 
 
         # this will reflect the start positions of each player to begin with
-        self.player_positions = {"Miss Scarlet":(0,3),
-                                 "Colonel Mustard":(1,4),
-                                 "Mrs. White":(4,3),
-                                 "Mr. Green":(4,1),
-                                 "Mrs. Peacock":(3,0),
-                                 "Professor Plum":(1,0)
+        self.player_positions = {"Miss Scarlet":(3,0),
+                                 "Colonel Mustard":(4,1),
+                                 "Mrs. White":(3,4),
+                                 "Mr. Green":(1,4),
+                                 "Mrs. Peacock":(0,3),
+                                 "Professor Plum":(0,1)
                                 }
 
     def find_player(self,player):
@@ -293,6 +393,8 @@ class board():
 
         # error if you get to here
         raise NoSuchPlayerError()
+
+
 
     def update_player_position(self,player,coordinate):
         '''Given a player and a coordinate, returns True if the position can \
@@ -307,6 +409,22 @@ be updated and raises InvalidMoveError otherwise. Updates the board accordingly.
         self.player_positions[player] = coordinate
         return True
 
+
+
+    def move_player_to_room(self,player,room):
+        '''This should only be used for accusations and suggestions.'''
+
+        coord = ()
+        for x in self.rooms.keys():
+            if self.rooms[x] == room:
+                self.player_positions[player] = x
+                return True
+
+        # if you get here, it's not a room
+        return False
+
+
+
     def position_is_empty(self,coordinate):
         '''Given a coordinate, returns True if position is empty and \
         False if position is occupied by another player.'''
@@ -316,16 +434,20 @@ be updated and raises InvalidMoveError otherwise. Updates the board accordingly.
         else:
             return False
 
+
+
     def validate_move(self,player,coordinate):
         '''Given a player and a coordinate, determines whether the \
 proposed move is allowable or not. Returns True if allowable, False if \
 otherwise.'''
-        # this means someone is already there, so can't move there
-        if not self.position_is_empty(coordinate):
-            return False
         # this means it's not actually a space, so can't move there either
         if coordinate in self.not_spaces:
             return False
+        # if it's a room, there can be more than one person
+        # otherwise, it better be empty
+        if coordinate not in self.rooms.keys():
+            if not self.position_is_empty(coordinate):
+                return False
 
         current_coord = self.player_positions[player]
 
@@ -345,6 +467,8 @@ otherwise.'''
         self.player_positions[player] = coordinate 
         return True
 
+
+
     def room_name(self, coord):
         self.valid_coordinate(coord)
 
@@ -356,6 +480,8 @@ otherwise.'''
 
         else:
             return "Hallway"
+
+
 
     def valid_coordinate(self,coord):
         '''Private method. Checks that given coordinate is valid form.'''
@@ -373,6 +499,8 @@ otherwise.'''
 
         # if it's valid, return true
         return True
+
+
 
     def pickle(self):
         pickle = ""
