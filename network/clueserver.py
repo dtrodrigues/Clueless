@@ -34,7 +34,7 @@ class GameServerProtocol(MessageReceiver):
         print line    
         response = self.factory.game.invoke(line)
         print response
-        for player in players:
+        for player in self.players:
             player.sendMessage(response)
 
             
