@@ -174,51 +174,56 @@ def start_playing(player):
     clock = pygame.time.Clock()
 
     while not GAMEOVER:
-        
+        GAMEOVER = one_lap(player)
         clock.tick(120)
         
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                GAMEOVER = True
-            elif event.type == KEYDOWN and event.key == K_RIGHT:
-                player.move((player.location.x+1, player.location.y))
-            elif event.type == KEYDOWN and event.key == K_LEFT:
-                player.move((player.location.x-1, player.location.y))
-            elif event.type == KEYDOWN and event.key == K_UP:
-                player.move((player.location.x, player.location.y-1))
-            elif event.type == KEYUP and event.key == K_DOWN:
-                player.move((player.location.x, player.location.y+1))
-            elif event.type == KEYDOWN and event.key == K_p:
-                if player.location.x == 0 and player.location.y == 0:
-                    player.move((XMAX, YMAX))
-                elif player.location.x == 0 and player.location.y == YMAX:
-                    player.move((XMAX, 0))
-                elif player.location.x == XMAX and player.location.y == 0:
-                    player.move((0, YMAX))
-                elif player.location.x == XMAX and player.location.y == YMAX:
-                    player.move((0, 0))
-            elif event.type == MOUSEBUTTONUP:
-                mouse = pygame.mouse.get_pos()
-                if player.board.btn_exit.pressed(mouse):        # Exit game
-                    GAMEOVER = True
-                if player.board.btn_notebook.pressed(mouse): # View Notebook
-                    player.notebook.start()
-                if player.board.btn_suggest.pressed(mouse): # Make a Suggestion
-                    player.make_suggestion()
-                if player.board.btn_accuse.pressed(mouse): # Make an Accusation
-                    player.make_accusation()
-                if player.board.btn_cards.pressed(mouse):
-                    player.view_cards()
-                for cell in player.board.cells:
-                    if cell.clicked(mouse):
-                        player.move((cell.x, cell.y))
-
-        player.screen.blit( player.board.background, (0,0) )
-        player.update()
-        pygame.display.flip()
-    
-
     sys.exit()
+
+        
+def one_lap(player):        
+        
+    GAMEOVER = False
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+            GAMEOVER = True
+        elif event.type == KEYDOWN and event.key == K_RIGHT:
+            player.move((player.location.x+1, player.location.y))
+        elif event.type == KEYDOWN and event.key == K_LEFT:
+            player.move((player.location.x-1, player.location.y))
+        elif event.type == KEYDOWN and event.key == K_UP:
+            player.move((player.location.x, player.location.y-1))
+        elif event.type == KEYUP and event.key == K_DOWN:
+            player.move((player.location.x, player.location.y+1))
+        elif event.type == KEYDOWN and event.key == K_p:
+            if player.location.x == 0 and player.location.y == 0:
+                player.move((XMAX, YMAX))
+            elif player.location.x == 0 and player.location.y == YMAX:
+                player.move((XMAX, 0))
+            elif player.location.x == XMAX and player.location.y == 0:
+                player.move((0, YMAX))
+            elif player.location.x == XMAX and player.location.y == YMAX:
+                player.move((0, 0))
+        elif event.type == MOUSEBUTTONUP:
+            mouse = pygame.mouse.get_pos()
+            if player.board.btn_exit.pressed(mouse):        # Exit game
+                GAMEOVER = True
+            if player.board.btn_notebook.pressed(mouse): # View Notebook
+                player.notebook.start()
+            if player.board.btn_suggest.pressed(mouse): # Make a Suggestion
+                player.make_suggestion()
+            if player.board.btn_accuse.pressed(mouse): # Make an Accusation
+                player.make_accusation()
+            if player.board.btn_cards.pressed(mouse):
+                player.view_cards()
+            for cell in player.board.cells:
+                if cell.clicked(mouse):
+                    player.move((cell.x, cell.y))
+
+    player.screen.blit( player.board.background, (0,0) )
+    player.update()
+    pygame.display.flip()
+    return GAMEOVER
+
 
 if __name__ == '__main__':
     main()
