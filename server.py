@@ -35,15 +35,17 @@ class Server():
             self.game_on = True
 
             # deal the rest of the cards
-            playercards = {}
+            info = {}
             self.game.distribute_remaining_cards()
             for x in self.game.playerlist:
-                playercards[x.suspect] = x.cards
+                info[x.suspect] = x.cards
+
+            info['board'] = self.game.pickle_board()
 
             outbound = m.Message(
                 direction = m.FROM_SERVER,
                 typ       = m.START,
-                info      = playercards,
+                info      = info,
                 new_turn  = self.game.current_player,
                 comment   = "Game is beginning. Dealing cards to players."
             )
