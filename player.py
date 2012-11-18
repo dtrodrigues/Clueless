@@ -94,6 +94,7 @@ class Character(Suspect):
         cards.append(card.Card('library'))
         cards.append(card.Card('candlestick'))
         cards.append(card.Card('lead'))
+        cards.append(card.Card('knife'))
         return cards
         
         
@@ -155,6 +156,10 @@ class Character(Suspect):
 
 def main():
     
+    initiate_game()
+    
+def initiate_game():
+
     valid_players = ['green', 'mustard', 'peacock', 'plum', 'scarlet', 'white']
     player_name = ''
     
@@ -163,6 +168,7 @@ def main():
         p = player_selection.PlayerSelection(valid_players)
         p.start()
         player_name = p.p.value
+        # Update valid_players with info from server
         
     player = Character(str(player_name)) #, myBoard.screen)
     start_playing(player)
