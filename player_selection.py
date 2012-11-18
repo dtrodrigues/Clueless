@@ -4,7 +4,7 @@ import pygame, sys
 from pgu import gui
 
 class PlayerSelection():
-    def __init__(self, screen = None):
+    def __init__(self, valid_players, screen = None):
 
         self.screen = screen
         #self.WIDTH = 400
@@ -15,13 +15,22 @@ class PlayerSelection():
         
         self.app.connect(gui.QUIT, self.app.quit, None)
         
+        self.msg = gui.Label('Please select a player')
+        self.container.add(self.msg, 450, 150)
+        
         self.p = gui.Select(value = 'green')
-        self.p.add("Mr. Green", 'green')
-        self.p.add("Colonel Mustard", 'mustard')
-        self.p.add("Mrs. Peacock", 'peacock')
-        self.p.add("Professor Plum", 'plum')
-        self.p.add("Miss Scarlet", 'scarlet')
-        self.p.add("Mrs. White", 'white')
+        if 'green' in valid_players:
+            self.p.add("Mr. Green", 'green')
+        if 'mustard' in valid_players:
+            self.p.add("Colonel Mustard", 'mustard')
+        if 'peacock' in valid_players:
+            self.p.add("Mrs. Peacock", 'peacock')
+        if 'plum' in valid_players:
+            self.p.add("Professor Plum", 'plum')
+        if 'scarlet' in valid_players:
+            self.p.add("Miss Scarlet", 'scarlet')
+        if 'white' in valid_players:
+            self.p.add("Mrs. White", 'white')
         
         self.container.add(self.p, 450,250)
         

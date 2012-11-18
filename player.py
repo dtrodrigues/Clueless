@@ -3,7 +3,7 @@ from pygame.locals import *
 
 from pgu import gui
 
-import board, notebook, player_selection, suggestion, accusation
+import board, notebook, player_selection, suggestion, accusation, card
 from sector import Sector
 
 ROOMWIDTH = 128
@@ -19,7 +19,7 @@ HALLOFFSET_Y = 80
 XMAX = 4
 YMAX = 4
 
-class Opponent(pygame.sprite.Sprite):
+class Suspect(pygame.sprite.Sprite):
     def __init__(self, name):
         pygame.sprite.Sprite.__init__(self)
         self.name = name
@@ -61,28 +61,9 @@ class Opponent(pygame.sprite.Sprite):
         return location
 
 
-class Character(pygame.sprite.Sprite):
+class Character(Suspect):
     def __init__(self, name): #, screen):
-        pygame.sprite.Sprite.__init__(self)
-        self.name = name
-        if name == "green":
-            self.xOffset = 10
-            self.yOffset = 20
-        elif name == 'mustard':
-            self.xOffset = 20
-            self.yOffset = 50
-        elif name == 'peacock':
-            self.xOffset = 30
-            self.yOffset = 20
-        elif name == 'plum':
-            self.xOffset = 40
-            self.yOffset = 50
-        elif name == 'scarlet':
-            self.xOffset = 50
-            self.yOffset = 20
-        else: # name == 'white'
-            self.xOffset = 60
-            self.yOffset = 50
+        Suspect.__init__(self, name)
         
         self.board = board.Board()
         #self.board.ShowSplash()
@@ -101,12 +82,12 @@ class Character(pygame.sprite.Sprite):
         self.accusation = accusation.Accusation()
         
     def getOpponents(self):
-        green = Opponent('green')
-        mustard = Opponent('mustard')
-        plum = Opponent('plum')
-        peacock = Opponent('peacock')
-        scarlet = Opponent('scarlet')
-        white = Opponent('white')
+        green = Suspect('green')
+        mustard = Suspect('mustard')
+        plum = Suspect('plum')
+        peacock = Suspect('peacock')
+        scarlet = Suspect('scarlet')
+        white = Suspect('white')
         if self.name != 'mustard':
             self.opponents['mustard'] = (mustard)
         if self.name != 'plum':
@@ -119,21 +100,7 @@ class Character(pygame.sprite.Sprite):
             #self.opponents.append(white)
         #if self.name != 'green':
          #   self.opponents.append(green)
-        
-    def getStartingLocation(self):
-        if self.name == "scarlet":
-            self.location = Sector(3,0,'')
-        elif self.name == 'green':
-            self.location = Sector(1,4,'')
-        elif self.name == 'mustard':
-            self.location = Sector(4,1,'')
-        elif self.name == 'peacock':
-            self.location = Sector(0,3,'')
-        elif self.name == 'plum':
-            self.location = Sector(0,1,'')
-        else: # White
-            self.location = Sector(3,4,'')
-        
+                
     
     def move(self, requested_location):
         #if requested_location in self.board.valid_locations:
@@ -174,7 +141,7 @@ def main():
     
     while player_name not in valid_players:
     
-        p = player_selection.PlayerSelection()
+        p = player_selection.PlayerSelection(valid_players)
         p.start()
         player_name = p.p.value
         
