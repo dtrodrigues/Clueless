@@ -21,7 +21,7 @@ class GameServerProtocol(MessageReceiver):
         log.msg("Connection lost from {0}:{1}".format(peer.host, peer.port))
         self.factory.playerDisconnected(self)
         
-    def startGame(self, assignedPlayers):
+    def setPlayers(self, assignedPlayers):
         self.players = assignedPlayers
         
     def messageReceived(self, line):
@@ -34,7 +34,7 @@ class GameServerProtocol(MessageReceiver):
         print line    
         response = self.factory.game.invoke(line)
         print response
-        for player in assignedPlayers:
+        for player in players:
             player.sendMessage(response)
 
             
@@ -54,12 +54,16 @@ class GameFactory(protocol.ServerFactory):
     def findOpponents(self, player):
     
         if self.availablePlayers == 0:
+            log.msg('{0}:{1} tried to join the game but there is no room'.format(peer.host, peer.port))
             return
         else:
             self.availablePlayers -= 1
             peer = player.transport.getPeer()
             log.msg('{0}:{1} assigned to game'.format(peer.host, peer.port))
             self.assignedPlayers.append(player)
+            
+            for player in self.assignedPlayers:
+                player.setPlayers(self.assignedPlayers)
             
     def playerDisconnected(self, player):
         pass
