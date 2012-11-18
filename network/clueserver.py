@@ -31,7 +31,7 @@ class GameServerProtocol(MessageReceiver):
         log.msg('Message received from {0}:{1}'.format(peer.host, 
                                                            peer.port))
         for player in self.players:
-            self.players[character].sendMessage(message)
+            player.sendMessage(message)
 
 
 class GameFactory(protocol.ServerFactory):
