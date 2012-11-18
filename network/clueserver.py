@@ -5,10 +5,16 @@ from twisted.internet import protocol
 from twisted.application import service
 
 from messageprotocol import MessageReceiver
-               
+
+import server
+
+game = server.Server()
+
+
 class GameServerProtocol(MessageReceiver):
 
     def __init__(self):
+        #game = server.Server()
         self.players = None
 
     def connectionMade(self):
@@ -30,10 +36,15 @@ class GameServerProtocol(MessageReceiver):
         peer = self.transport.getPeer()
         log.msg('Message received from {0}:{1}'.format(peer.host, 
                                                            peer.port))
-        for player in self.players:
-            player.sendMessage(message)
+        #for player in self.players:
+        #    player.sendMessage(message)
+    
+        response = self.factory.game.invoke(message)
 
+        for player in assignedPlayers:
+            player.sendMessage(response)
 
+            
 class GameFactory(protocol.ServerFactory):
 
     protocol = GameServerProtocol
@@ -44,31 +55,20 @@ class GameFactory(protocol.ServerFactory):
         self.availablePlayers = 6
         self.assignedPlayers = []
         
+        self.game = server.Server()
+        
+        
     def findOpponents(self, player):
-        
-        self.availablePlayers -= 1
-        
-        peer = player.transport.getPeer()
-        log.msg('{0}:{1} assigned to game'.format(peer.host, peer.port))
-        self.assignedPlayers.append(player)
-        
-        #wait for other players
-            
+    
         if self.availablePlayers == 0:
-            #six players joined so start game
-            log.msg('Six players joined, starting game')
-            for player in self.assignedPlayers:
-                player.startGame(self.assignedPlayers)
-            
-            #reset
-            self.assignedPlayers = []
-            self.availablePlayers = 6
-            
-            #game started
-
+            return
+        else:
+            self.availablePlayers -= 1
+            peer = player.transport.getPeer()
+            log.msg('{0}:{1} assigned to game'.format(peer.host, peer.port))
+            self.assignedPlayers.append(player)
             
     def playerDisconnected(self, player):
-        
         pass
 
 class GameService(service.Service):
