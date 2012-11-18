@@ -5,18 +5,10 @@ from twisted.internet import protocol
 from twisted.application import service
 
 from messageprotocol import MessageReceiver
-
-cluePlayers = ['Scarlett',
-               'Mustard',
-               'White',
-               'Green',
-               'Peacock',
-               'Plum']
                
 class GameServerProtocol(MessageReceiver):
 
     def __init__(self):
-        self.playerName = None
         self.players = None
 
     def connectionMade(self):
@@ -29,22 +21,17 @@ class GameServerProtocol(MessageReceiver):
         peer = self.transport.getPeer()
         log.msg("Connection lost from {0}:{1}".format(peer.host, peer.port))
         self.factory.playerDisconnected(self)
-
-    def assignPlayer(self, assignedName):
-        self.playerName = assignedName
         
-    def startGame(self, playerMap):
-        self.players = playerMap
+    def startGame(self, assignedPlayers):
+        self.players = assignedPlayers
         
     def messageReceived(self, message):
         """Called whenever a message is received from a client"""
         peer = self.transport.getPeer()
-        log.msg('Message received from {0}:{1}:{2}'.format(self.playerName, 
-                                                           peer.host, 
+        log.msg('Message received from {0}:{1}'.format(peer.host, 
                                                            peer.port))
-        for character in self.players:
-            if character != self.playerName:
-                self.players[character].sendMessage(message)
+        for player in self.players:
+            self.players[character].sendMessage(message)
 
 
 class GameFactory(protocol.ServerFactory):
@@ -54,38 +41,35 @@ class GameFactory(protocol.ServerFactory):
 
     def __init__(self, service):
         self.service = service
-        self.availablePlayers = cluePlayers
-        self.assignedPlayers = {}
+        self.availablePlayers = 6
+        self.assignedPlayers = []
         
     def findOpponents(self, player):
-    
-        assignedPlayer = self.availablePlayers.pop()
+        
+        self.availablePlayers -= 1
+        
         peer = player.transport.getPeer()
-        log.msg('{0}:{1} assigned to {2}'.format(peer.host, peer.port, 
-                                                 assignedPlayer))
-        self.assignedPlayers[assignedPlayer] = player
-        player.assignPlayer(assignedPlayer)
+        log.msg('{0}:{1} assigned to game'.format(peer.host, peer.port))
+        self.assignedPlayers.append(player)
         
         #wait for other players
             
-        if self.availablePlayers == []:
+        if self.availablePlayers == 0:
             #six players joined so start game
             log.msg('Six players joined, starting game')
-            for player in self.assignedPlayers.values():
+            for player in self.assignedPlayers:
                 player.startGame(self.assignedPlayers)
             
             #reset
-            self.assignedPlayers = {}
-            self.availablePlayers = cluePlayers
+            self.assignedPlayers = []
+            self.availablePlayers = 6
             
             #game started
 
             
     def playerDisconnected(self, player):
-        try:
-            self.queue.remove(player)
-        except ValueError:
-            pass
+        
+        pass
 
 class GameService(service.Service):
     pass
