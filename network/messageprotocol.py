@@ -2,12 +2,12 @@ from twisted.protocols import basic
 
 class MessageReceiver(basic.LineOnlyReceiver):
 
-    def lineReceived(self, message):
-        self.messageReceived(message)
+    def lineReceived(self, line):
+        self.messageReceived(line)
 
-    def messageReceived(self, message):
+    def messageReceived(self, line):
         raise NotImplementedError
 
-    def sendMessage(self, message):
-        self.sendLine(message)
+    def sendMessage(self, line):
+        self.sendLine(line)
 

@@ -8,9 +8,6 @@ from messageprotocol import MessageReceiver
 
 import server
 
-game = server.Server()
-
-
 class GameServerProtocol(MessageReceiver):
 
     def __init__(self):
@@ -31,7 +28,7 @@ class GameServerProtocol(MessageReceiver):
     def startGame(self, assignedPlayers):
         self.players = assignedPlayers
         
-    def messageReceived(self, message):
+    def messageReceived(self, line):
         """Called whenever a message is received from a client"""
         peer = self.transport.getPeer()
         log.msg('Message received from {0}:{1}'.format(peer.host, 
@@ -39,7 +36,7 @@ class GameServerProtocol(MessageReceiver):
         #for player in self.players:
         #    player.sendMessage(message)
     
-        response = self.factory.game.invoke(message)
+        response = self.factory.game.invoke(line)
 
         for player in assignedPlayers:
             player.sendMessage(response)
