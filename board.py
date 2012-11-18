@@ -49,6 +49,7 @@ class Board:
         self.btn_notebook = button.Button('button_notebook')
         self.btn_suggest = button.Button('button_suggest')
         self.btn_accuse = button.Button('button_accuse')
+        self.btn_cards = button.Button('button_cards')
         self.btn_exit = button.Button('button_close')
                
 
@@ -128,11 +129,13 @@ class Board:
         self.btn_notebook.setCords(ROOMWIDTH * 6.5, ROOMHEIGHT * 3)
         self.btn_suggest.setCords(ROOMWIDTH * 6.5, ROOMHEIGHT * 3.5)
         self.btn_accuse.setCords(ROOMWIDTH * 6.5, ROOMHEIGHT * 4)
+        self.btn_cards.setCords(ROOMWIDTH * 6.5, ROOMHEIGHT * 4.5)
         self.btn_exit.setCords(ROOMWIDTH * 6.5, ROOMHEIGHT * 5)
         
         self.background.blit(self.btn_notebook.image, self.btn_notebook.rect.topleft)
         self.background.blit(self.btn_suggest.image, self.btn_suggest.rect.topleft)
         self.background.blit(self.btn_accuse.image, self.btn_accuse.rect.topleft)
+        self.background.blit(self.btn_cards.image, self.btn_cards.rect.topleft)
         self.background.blit(self.btn_exit.image, self.btn_exit.rect.topleft)
         pygame.display.flip()
         

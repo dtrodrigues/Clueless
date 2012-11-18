@@ -93,6 +93,7 @@ class Character(Suspect):
         cards.append(card.Card('wrench'))
         cards.append(card.Card('library'))
         cards.append(card.Card('candlestick'))
+        cards.append(card.Card('lead'))
         return cards
         
         
@@ -168,13 +169,10 @@ def main():
 
 def start_playing(player):
     
-
-    GAMEOVER = False
-
     clock = pygame.time.Clock()
 
-    while not GAMEOVER:
-        GAMEOVER = one_lap(player)
+    while True:
+        one_lap(player)
         clock.tick(120)
         
     sys.exit()
@@ -222,7 +220,8 @@ def one_lap(player):
     player.screen.blit( player.board.background, (0,0) )
     player.update()
     pygame.display.flip()
-    return GAMEOVER
+    if GAMEOVER:
+        sys.exit()
 
 
 if __name__ == '__main__':
