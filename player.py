@@ -72,6 +72,8 @@ class Character(Suspect):
         
         self.image = pygame.image.load("images/"+name+".png")
         self.rect = self.image.get_rect()
+        
+        self.cards = self.getCards()
 
         self.opponents = {}
         self.getOpponents()
@@ -80,6 +82,19 @@ class Character(Suspect):
 
         self.suggestion = suggestion.Suggestion()
         self.accusation = accusation.Accusation()
+        self.viewCards = card.ViewCard(self.cards)
+        
+        
+    def getCards(self):
+        cards = []
+        cards.append(card.Card('green'))
+        cards.append(card.Card('rope'))
+        cards.append(card.Card('revolver'))
+        cards.append(card.Card('wrench'))
+        cards.append(card.Card('library'))
+        cards.append(card.Card('candlestick'))
+        return cards
+        
         
     def getOpponents(self):
         green = Suspect('green')
@@ -123,6 +138,9 @@ class Character(Suspect):
             suspect = self.accusation.suspect.value
             weapon = self.accusation.weapon.value
             room = self.accusation.room.value
+
+    def view_cards(self):
+        self.viewCards.create()
 
     def update(self):
         # Update the display with the locations of all player tokens
@@ -189,6 +207,8 @@ def start_playing(player):
                     player.make_suggestion()
                 if player.board.btn_accuse.pressed(mouse): # Make an Accusation
                     player.make_accusation()
+                if player.board.btn_cards.pressed(mouse):
+                    player.view_cards()
                 for cell in player.board.cells:
                     if cell.clicked(mouse):
                         player.move((cell.x, cell.y))
