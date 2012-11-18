@@ -1,11 +1,7 @@
-import random
-from collections import deque
 from twisted.python import log
 from twisted.internet import protocol
 from twisted.application import service
-
 from messageprotocol import MessageReceiver
-
 import server
 
 class GameServerProtocol(MessageReceiver):
@@ -35,9 +31,9 @@ class GameServerProtocol(MessageReceiver):
                                                            peer.port))
         #for player in self.players:
         #    player.sendMessage(message)
-    
+        print line    
         response = self.factory.game.invoke(line)
-
+        print response
         for player in assignedPlayers:
             player.sendMessage(response)
 
