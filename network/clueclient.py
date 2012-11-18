@@ -4,6 +4,8 @@ import re
 from functools import partial
 from twisted.protocols import basic
 from twisted.internet import protocol, stdio
+from twisted.internet.task import LoopingCall
+import player
 
 from messageprotocol import MessageReceiver
 
@@ -91,6 +93,9 @@ def run_client():
     host, port = parse_args()
     factory = GameClientFactory()
     reactor.connectTCP(host, port, factory)  #@UndefinedVariable
+    #lc = LoopingCall(player.loopOnce)
+    #lc.start(.5)
+    
     reactor.run()  #@UndefinedVariable
 
 if __name__ == '__main__':
