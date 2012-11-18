@@ -39,9 +39,7 @@ class GameClientProtocol(MessageReceiver):
 
     def userInputReceived(self, string):
         #create a dummy message from first two words on the command line
-        s = string.split()
-        message = {s[0]: s[1]}
-        self.sendMessage(message)
+        self.sendMessage(string)
 
     def messageReceived(self, message):
         self.out("Message received from server: %s" % message)
