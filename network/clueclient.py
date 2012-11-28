@@ -1,33 +1,18 @@
 #!/usr/bin/env python
 import optparse
-import re
 from twisted.protocols import basic
-from twisted.internet import protocol, stdio
+from twisted.internet import protocol
 from twisted.internet.task import LoopingCall
 
 from view.client import Client
 from view.player import ClueGUI
 
-from messageprotocol import MessageReceiver
-
-
-class UserInputProtocol(basic.LineReceiver):
-
-    from os import linesep as delimiter  #@UnusedImport
-
-    def __init__(self, callback):
-        self.callback = callback
-
-    def lineReceived(self, line):
-        self.callback(line)
-
-class GameClientProtocol(MessageReceiver):
-
+class GameClientProtocol(basic.LineReceiver):
 
     def __init__(self):
-        #self.game = Game()
         self.playerName = None
         self.debug_enabled = False
+
 
     def out(self, *messages):
         for message in messages:
@@ -42,13 +27,9 @@ class GameClientProtocol(MessageReceiver):
         self.factory.client.run()
         #self.out("Connected!")
 
-    def userInputReceived(self, string):
-        #create a dummy message from first two words on the command line
-        self.sendMessage(string)
-
-    def messageReceived(self, message):
+    def lineReceived(self, line):
         #self.out("Message received from server: %s" % message)
-        self.factory.client.handle_action(message)
+        self.factory.client.handle_action(line)
 
 class GameClientFactory(protocol.ClientFactory):
     protocol = GameClientProtocol
