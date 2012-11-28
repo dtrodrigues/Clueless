@@ -1,6 +1,7 @@
 #!/usr/bin/env python
-import game
-import message as m
+from logic import game
+
+import logic.message as m
 import pickle
 
 class ServerError(IOError): pass
@@ -9,7 +10,7 @@ class Ignore(ServerError): pass
 class Server():
 
     def __init__(self):
-        self.game = game.game()
+        self.game = game.Game()
         self.current_suggestion = ()
         self.game_on = False
 
@@ -39,6 +40,7 @@ class Server():
             self.game.distribute_remaining_cards()
             for x in self.game.playerlist:
                 info[x.suspect] = x.cards
+            info['players']  = [x.suspect for x in self.game.playerlist]
 
             info['board'] = self.game.pickle_board()
 
@@ -62,7 +64,7 @@ class Server():
                 name    = inbound.info['name']
                 suspect = inbound.info['suspect']
 
-                newplayer = game.player(name,suspect)
+                newplayer = game.Player(name,suspect)
                 self.game.add_player(newplayer)
 
             except game.PlayerError, errmsg:
@@ -88,8 +90,8 @@ class Server():
             suspect = inbound.info['suspect']
             coord   = inbound.info['coord']
 
-            if suspect != self.game.current_player:
-                raise Ignore("It is not this player's turn.")
+            #if suspect != self.game.current_player:
+            #    raise Ignore("It is not this player's turn.")
 
             success = self.game.update_player_position(suspect,coord)
             newboard = self.game.pickle_board()

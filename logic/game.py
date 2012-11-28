@@ -21,6 +21,7 @@ __suspects__ = ['Miss Scarlet','Colonel Mustard','Mrs. White','Mr. Green','Mrs. 
 __weapons__ = ['Candlestick','Dagger','Lead Pipe','Revolver','Rope','Wrench']
 
 
+
 ###################################################################
 #
 #   CLASS: game
@@ -28,14 +29,14 @@ __weapons__ = ['Candlestick','Dagger','Lead Pipe','Revolver','Rope','Wrench']
 #
 ###################################################################
 
-class game():
+class Game():
 
 #
 #   INIT
 #
     def __init__(self):
-        self.board = board()
-        self.deck = deck()
+        self.board = Board()
+        self.deck = Deck()
 
         # the hash values will be populated with player objects
         # as players are added, but for now they are empty
@@ -265,7 +266,7 @@ coordinate. Returns True on success, False otherwise.'''
 #
 ##############################################################
 
-class player():
+class Player():
 
     def __init__(self,name,suspect,ip_address=None,port=None):
         self.connected = True
@@ -311,7 +312,7 @@ class player():
 #
 ################################################################
 
-class deck():
+class Deck():
 
     def __init__(self):
         # hopefully this will do for our purposes
@@ -357,7 +358,7 @@ shuffled.'''
 #
 ##################################################################
 
-class board():
+class Board():
 
     def __init__(self):
         self.min_xy = 0

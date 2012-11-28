@@ -70,7 +70,7 @@ class Board:
         
                
     def ShowSplash(self):
-        splashImg = pygame.image.load('images/splash_screen.png')
+        splashImg = pygame.image.load('view/images/splash_screen.png')
         
         self.screen.blit(splashImg, (50,50))
         pygame.display.flip()

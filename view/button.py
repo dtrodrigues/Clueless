@@ -8,7 +8,7 @@ class Button(pygame.sprite.Sprite):
         a boolean and should be called inside the input loop."""
     def __init__(self, image_name):
         pygame.sprite.Sprite.__init__(self)
-        self.image = pygame.image.load('images/' + image_name + '.png')
+        self.image = pygame.image.load('view/images/' + image_name + '.png')
         self.rect = self.image.get_rect()
         
     def setCords(self,x,y):

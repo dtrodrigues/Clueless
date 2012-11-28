@@ -1,11 +1,12 @@
 #!/usr/bin/env python
 import optparse
 import re
-from functools import partial
 from twisted.protocols import basic
 from twisted.internet import protocol, stdio
 from twisted.internet.task import LoopingCall
-import player
+
+from view.client import Client
+from view.player import ClueGUI
 
 from messageprotocol import MessageReceiver
 
@@ -22,6 +23,7 @@ class UserInputProtocol(basic.LineReceiver):
 
 class GameClientProtocol(MessageReceiver):
 
+
     def __init__(self):
         #self.game = Game()
         self.playerName = None
@@ -36,15 +38,17 @@ class GameClientProtocol(MessageReceiver):
             self.out(*messages)
 
     def connectionMade(self):
-        stdio.StandardIO(UserInputProtocol(self.userInputReceived))
-        self.out("Connected!")
+        self.factory.client.set_connection(self)
+        self.factory.client.run()
+        #self.out("Connected!")
 
     def userInputReceived(self, string):
         #create a dummy message from first two words on the command line
         self.sendMessage(string)
 
     def messageReceived(self, message):
-        self.out("Message received from server: %s" % message)
+        #self.out("Message received from server: %s" % message)
+        self.factory.client.handle_action(message)
 
 class GameClientFactory(protocol.ClientFactory):
     protocol = GameClientProtocol
@@ -71,12 +75,17 @@ def parse_args():
 
     parser = optparse.OptionParser(usage)
 
-    _, args = parser.parse_args()
+    a, args = parser.parse_args()
+    startGame = False
 
     if not args:
         address = "127.0.0.1:20000"
+    elif len(args) == 2:
+        address = args[1]
+        startGame = (args[0] == "true")
     else:
-        address = args[0]
+        startGame = (args[0] == "true")
+        address = "127.0.0.1:20000"
 
     if ':' not in address:
         host, port = '127.0.0.1', address
@@ -86,15 +95,22 @@ def parse_args():
     if not port.isdigit():
         parser.error("Ports must be integers.")
 
-    return host, int(port)
+    return startGame, host, int(port)
 
 def run_client():
     from twisted.internet import reactor
-    host, port = parse_args()
+    startGame, host, port = parse_args()
     factory = GameClientFactory()
+    clueGui = ClueGUI()
+    plyr, char = clueGui.initiate_game()
+    client = Client(plyr, char, startGame)
+    factory.client = client
+    clueGui.client = client
     reactor.connectTCP(host, port, factory)  #@UndefinedVariable
-    #lc = LoopingCall(player.loopOnce)
-    #lc.start(.5)
+
+    
+    lc = LoopingCall(clueGui.one_lap)
+    lc.start(.5)
     
     reactor.run()  #@UndefinedVariable
 

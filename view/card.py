@@ -5,7 +5,7 @@ from pgu import gui
 class Card():
     def __init__(self, name):
         self.name = name
-        self.image_name = "images/cards/" + name + "_card.png"
+        self.image_name = "view/images/cards/" + name + "_card.png"
         self.image = pygame.image.load(self.image_name)
         
 class ViewCard():

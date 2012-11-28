@@ -54,6 +54,7 @@ FROM_SERVER types
 		info[suspect_name] = cards
 			info is simply a dictionary that is keyed with suspect names and contains arrays of the cards
 			No cheating!
+        info['players'] = list of players
 	ADD_PLAYER
 		indicates a player has been added to the game
 		info['name'] = player name
