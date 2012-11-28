@@ -1,10 +1,10 @@
 from twisted.python import log
 from twisted.internet import protocol
+from twisted.protocols import basic
 from twisted.application import service
-from messageprotocol import MessageReceiver
 import server
 
-class GameServerProtocol(MessageReceiver):
+class GameServerProtocol(basic.LineReceiver):
 
     def __init__(self):
         #game = server.Server()
@@ -24,7 +24,7 @@ class GameServerProtocol(MessageReceiver):
     def setPlayers(self, assignedPlayers):
         self.players = assignedPlayers
         
-    def messageReceived(self, line):
+    def lineReceived(self, line):
         """Called whenever a message is received from a client"""
         peer = self.transport.getPeer()
         log.msg('Message received from {0}:{1}'.format(peer.host, 
@@ -35,7 +35,7 @@ class GameServerProtocol(MessageReceiver):
         response = self.factory.game.invoke(line)
         print response
         for player in self.players:
-            player.sendMessage(response)
+            player.sendLine(response)
 
             
 class GameFactory(protocol.ServerFactory):
