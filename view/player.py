@@ -150,6 +150,7 @@ class ClueGUI:
             p = player_selection.PlayerSelection(valid_players)
             p.start()
             player_name = p.p.value
+            start_game = p.chk_start.value
             # Update valid_players with info from server
             
         player = Character(str(player_name)) #, myBoard.screen)

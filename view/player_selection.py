@@ -34,6 +34,12 @@ class PlayerSelection():
         
         self.container.add(self.p, 450,250)
         
+        self.lbl_start = gui.Label('Start Game on Join')
+       	self.chk_start = gui.Switch(False)
+
+        self.container.add(self.lbl_start, 425,450)
+        self.container.add(self.chk_start, 625,450)
+
         self.join_btn = gui.Button("Join Game")
         self.join_btn.connect(gui.CLICK, self.app.quit, None) 
 
