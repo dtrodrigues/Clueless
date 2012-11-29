@@ -16,7 +16,6 @@ class Client():
         self.char = char
         self.startGame = startGame
 
-
     def set_connection(self, connection):
         self.connection = connection
 
@@ -25,7 +24,6 @@ class Client():
 
     def connect(self):
 
-        print "connected"
         d  = m.Message(m.TO_SERVER, m.ADD_ME, info={"name": self.name, "suspect": guiToServ[self.name]})
 
         self.connection.sendLine(pickle.dumps(d))
@@ -35,24 +33,30 @@ class Client():
             self.connection.sendLine(pickle.dumps(d))
 
     def handle_action(self, line):
-        #print str(pickle.loads(line))
         mes = pickle.loads(line)
         if mes.direction == m.FROM_SERVER:
             if mes.typ == m.START:
-                cards = mes.info[guiToServ[self.name]]
-                newCards = []
-                for card in cards:
-                    newCards.append(servToGui[card])
-                self.char.setCards(newCards)
-                #update opponents and their positions
-                players = mes.info['players']
-                self.allPlayers = [servToGui[x] for x in players]
-                self.opps = filter(lambda x: x != self.name, self.allPlayers)
-                self.char.setOpponents(self.opps)
-            if mes.typ == m.MADE_MOVE:
-                print 'move made'
-                newBoard = pickle.loads(mes.info['board'])
-                for p in self.opps:
-                    newX, newY = newBoard.find_player(guiToServ[p])
-                    self.char.opponents[p].updateLocation(newX, newY)
+                self.startReceived(mes)
+            elif mes.typ == m.MADE_MOVE:
+                self.madeMoveReceived(self, mes)
+            else:
+                print "this message is not handled"
 
+    def startReceived(self, mes):
+        cards = mes.info[guiToServ[self.name]]
+        newCards = []
+        for card in cards:
+            newCards.append(servToGui[card])
+        self.char.setCards(newCards)
+
+        # keep track of opponents
+        players = mes.info['players']
+        self.allPlayers = [servToGui[x] for x in players]
+        self.opps = filter(lambda x: x != self.name, self.allPlayers)
+        self.char.setOpponents(self.opps)
+
+    def madeMoveReceived(self, mes):
+        newBoard = pickle.loads(mes.info['board'])
+        for p in self.opps:
+            newX, newY = newBoard.find_player(guiToServ[p])
+            self.char.opponents[p].updateLocation(newX, newY)
