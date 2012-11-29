@@ -155,7 +155,7 @@ class ClueGUI:
             
         player = Character(str(player_name)) #, myBoard.screen)
         self.char = player
-        return player_name, self.char
+        return start_game, player_name, self.char
         #start_playing(player)
 
     def start_playing(self):

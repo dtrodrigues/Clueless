@@ -56,17 +56,12 @@ def parse_args():
 
     parser = optparse.OptionParser(usage)
 
-    a, args = parser.parse_args()
-    startGame = False
+    _, args = parser.parse_args()
 
     if not args:
         address = "127.0.0.1:20000"
-    elif len(args) == 2:
-        address = args[1]
-        startGame = (args[0] == "true")
     else:
-        startGame = (args[0] == "true")
-        address = "127.0.0.1:20000"
+        address = args[0]
 
     if ':' not in address:
         host, port = '127.0.0.1', address
@@ -76,14 +71,15 @@ def parse_args():
     if not port.isdigit():
         parser.error("Ports must be integers.")
 
-    return startGame, host, int(port)
+    return host, int(port)
+
 
 def run_client():
     from twisted.internet import reactor
-    startGame, host, port = parse_args()
+    host, port = parse_args()
     factory = GameClientFactory()
     clueGui = ClueGUI()
-    plyr, char = clueGui.initiate_game()
+    startGame, plyr, char = clueGui.initiate_game()
     client = Client(plyr, char, startGame)
     factory.client = client
     clueGui.client = client
