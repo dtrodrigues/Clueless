@@ -38,7 +38,7 @@ class Client():
             if mes.typ == m.START:
                 self.startReceived(mes)
             elif mes.typ == m.MADE_MOVE:
-                self.madeMoveReceived(self, mes)
+                self.madeMoveReceived(mes)
             else:
                 print "this message is not handled"
 
