@@ -368,13 +368,13 @@ class Board():
         self.board  = [[0 for x in range(5)] for y in range(5)] 
         self.not_spaces = [(1,1),(1,3),(3,1),(3,3)]
         self.rooms = {(0,0):"Study",
-                      (0,2):"Hall",
-                      (0,4):"Lounge",
-                      (2,0):"Library",
+                      (0,2):"Library",
+                      (0,4):"Conservatory",
+                      (2,0):"Hall",
                       (2,2):"Billiard Room",
-                      (2,4):"Dining Room",
-                      (4,0):"Conservatory",
-                      (4,2):"Ballroom",
+                      (2,4):"Ballroom",
+                      (4,0):"Lounge",
+                      (4,2):"Dining Room",
                       (4,4):"Kitchen" 
                      } 
 
