@@ -122,7 +122,7 @@ class Character(Suspect):
         self.accusation = accusation.Accusation()
         self.viewCards = card.ViewCard(self.cards)
 
-	self.displayNames()
+        self.displayNames()
 
     def displayNames(self):
         self.font = pygame.font.Font(None, 30)
@@ -146,7 +146,7 @@ class Character(Suspect):
     def setOpponents(self, opps):
         for opp in opps:
             self.opponents[opp] = Suspect(opp)
-	self.displayNames()
+        self.displayNames()
     
     def move(self, requested_location):
         #if requested_location in self.board.valid_locations:
