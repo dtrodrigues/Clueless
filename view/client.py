@@ -39,8 +39,11 @@ class Client():
                 self.startReceived(mes)
             elif mes.typ == m.MADE_MOVE:
                 self.madeMoveReceived(mes)
+            elif mes.typ == m.MADE_SUGGESTION:
+                self.suggestionReceived(mes)
+                print "somebody made a suggestion"
             else:
-                print "this message is not handled"
+                print "message direction %d type %d is not handled" % (mes.direction, mes.typ)
 
     def startReceived(self, mes):
         cards = mes.info[guiToServ[self.name]]
@@ -60,3 +63,10 @@ class Client():
         for p in self.opps:
             newX, newY = newBoard.find_player(guiToServ[p])
             self.char.opponents[p].updateLocation(newX, newY)
+
+    def suggestionReceived(self, mes):
+        newBoard = pickle.loads(mes.info['board'])
+        for p in self.opps:
+            newX, newY = newBoard.find_player(guiToServ[p])
+            self.char.opponents[p].updateLocation(newX, newY)
+

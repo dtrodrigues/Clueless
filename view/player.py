@@ -115,13 +115,21 @@ class Character(Suspect):
             if suspect in self.opponents.keys():
                 self.opponents[suspect].location.update(self.location.x, self.location.y)
             self.update()
-            
+            return True, view.client.servToGui[room], suspect, weapon
+        else:
+            print "you must be in a room to make a suggestion"
+            return False, None, None, None
+
+
+
     def make_accusation(self):
         if self.location.pos in self.board.rooms.keys():
             self.accusation.create()
             suspect = self.accusation.suspect.value
             weapon = self.accusation.weapon.value
             room = self.accusation.room.value
+        else:
+            print "You must be in a room to make an accusation"
 
     def view_cards(self):
         self.viewCards.create()
@@ -129,9 +137,9 @@ class Character(Suspect):
     def update(self):
         # Update the display with the locations of all player tokens
         for opponent in self.opponents.values():
-            self.screen.blit(opponent.image, (opponent.xOffset + opponent.location.x * ROOMWIDTH + ROOMOFFSET_X, \
+            self.screen.blit(opponent.image, (opponent.xOffset + opponent.location.x * ROOMWIDTH + ROOMOFFSET_X,
                                               opponent.yOffset + opponent.location.y * ROOMHEIGHT + ROOMOFFSET_Y))
-        self.screen.blit(self.image, (self.xOffset + self.location.x * ROOMWIDTH + ROOMOFFSET_X,\
+        self.screen.blit(self.image, (self.xOffset + self.location.x * ROOMWIDTH + ROOMOFFSET_X,
                                       self.yOffset + self.location.y * ROOMHEIGHT + ROOMOFFSET_Y))
         pygame.display.flip()
         
@@ -172,7 +180,16 @@ class ClueGUI:
         if self.char.move((newx, newy)):
             d = m.Message(m.TO_SERVER, m.MAKE_MOVE,info={'suspect': view.client.guiToServ[self.char.name], 'coord': (newx,newy)},comment="test")
             self.client.connection.sendLine(pickle.dumps(d))
-            
+
+    def make_suggestion(self):
+        succ, room, suspect, weapon = self.char.make_suggestion()
+        if succ:
+            d = m.Message(m.TO_SERVER, m.MAKE_SUGGESTION,
+                    info={"suspect": view.client.guiToServ[self.char.name], "suggestion": tuple(map(lambda x: view.client.guiToServ[x],[room, suspect, weapon]))})
+            self.client.connection.sendLine(pickle.dumps(d))
+    
+
+
     def one_lap(self):        
             
         GAMEOVER = False
@@ -209,7 +226,8 @@ class ClueGUI:
                 if self.char.board.btn_notebook.pressed(mouse): # View Notebook
                     self.char.notebook.start()
                 if self.char.board.btn_suggest.pressed(mouse): # Make a Suggestion
-                    self.char.make_suggestion()
+                    self.make_suggestion()
+                    #self.char.make_suggestion()
                 if self.char.board.btn_accuse.pressed(mouse): # Make an Accusation
                     self.char.make_accusation()
                 if self.char.board.btn_cards.pressed(mouse):

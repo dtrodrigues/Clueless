@@ -114,8 +114,8 @@ class Server():
         elif inbound.typ == m.MAKE_SUGGESTION:
 
             suspect = inbound.info['suspect']
-            if suspect != self.game.current_player:
-                raise Ignore("It is not this player's turn.")
+            #if suspect != self.game.current_player:
+            #    raise Ignore("It is not this player's turn.")
             if suspect in self.game.losers:
                 raise Ignore("This player has lost and cannot suggest.")
 
