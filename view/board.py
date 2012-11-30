@@ -102,7 +102,7 @@ class Board:
                         name = "Conservatory"
                         passage = True
                     elif pos == (2, 4):
-                        name = "Dining Room"
+                        name = "Ballroom"
                     elif pos == (4, 4):
                         name = "Kitchen"
                         passage = True
