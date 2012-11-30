@@ -56,7 +56,7 @@ class Board:
         self.cells = []
         
         self.rooms = {(0,0):"Study",
-                      (0,2):"Libary",
+                      (0,2):"Library",
                       (0,4):"Conservatory",
                       (2,0):"Hall",
                       (2,2):"Billiard Room",
