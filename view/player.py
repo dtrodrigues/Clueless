@@ -47,6 +47,39 @@ class Suspect(pygame.sprite.Sprite):
         self.location = self.getStartingLocation()
         self.image = pygame.image.load("view/images/"+name+".png")
         self.rect = self.image.get_rect()
+        self.fancy_name = self.getFancyName()
+        self.color = self.getColor()
+
+    def getFancyName(self):
+        if self.name == 'green':
+            fancy_name = 'Mr. Green'
+        elif self.name == 'mustard':
+            fancy_name = 'Colonel Mustard'
+        elif self.name == 'peacock':
+            fancy_name = 'Mrs. Peacock'
+        elif self.name == 'plum':
+            fancy_name = 'Professor Plum'
+        elif self.name == 'scarlet':
+            fancy_name = 'Miss Scarlet'
+        else: # self.name == 'white'
+            fancy_name = 'Mrs. White'
+        return fancy_name
+    
+    def getColor(self):
+        if self.name == 'mustard':
+            color = [255,255,0]
+        elif self.name == 'green':
+            color = [0,255,0]
+        elif self.name == 'peacock':
+            color = [0,0,255]
+        elif self.name == 'plum':
+            color = [100,0,255]
+        elif self.name == 'scarlet':
+            color = [255,0,0]
+        else: # self.name == 'white'
+            color = [255,255,255]
+        return color
+
 
     def getStartingLocation(self):
         if self.name == "scarlet":
@@ -88,7 +121,22 @@ class Character(Suspect):
         self.suggestion = suggestion.Suggestion()
         self.accusation = accusation.Accusation()
         self.viewCards = card.ViewCard(self.cards)
-        
+
+	self.displayNames()
+
+    def displayNames(self):
+        self.font = pygame.font.Font(None, 30)
+        self.text = self.font.render(self.fancy_name, True, self.color)
+        x = 1
+        self.text_rect = pygame.Rect(ROOMWIDTH*6, 70, 50, 50)
+        self.board.background.blit(self.text, self.text_rect)
+            
+        for o in self.opponents.values(): # Show player list
+            self.text = self.font.render(o.fancy_name, True, o.color)
+            self.text_rect = pygame.Rect(ROOMWIDTH*6, 70+30*x, 50, 50)
+            self.board.background.blit(self.text, self.text_rect)
+            x += 1
+        pygame.display.flip()
         
     def setCards(self, cardList):
 
@@ -98,6 +146,7 @@ class Character(Suspect):
     def setOpponents(self, opps):
         for opp in opps:
             self.opponents[opp] = Suspect(opp)
+	self.displayNames()
     
     def move(self, requested_location):
         #if requested_location in self.board.valid_locations:
@@ -173,6 +222,12 @@ class ClueGUI:
             d = m.Message(m.TO_SERVER, m.MAKE_MOVE,info={'suspect': view.client.guiToServ[self.char.name], 'coord': (newx,newy)},comment="test")
             self.client.connection.sendLine(pickle.dumps(d))
             
+    def end_turn(self):
+        d = m.Message(m.TO_SERVER, m.NEXT_TURN, info={'suspect': view.client.guiToServ[self.char.name]}, \
+        new_turn = True, comment="end turn")
+        # self.client.connection.sendLine(pickle.dumps(d))
+	# Not sure if this is the right thing to do here.  But here is your end_turn function.
+
     def one_lap(self):        
             
         GAMEOVER = False
@@ -214,6 +269,9 @@ class ClueGUI:
                     self.char.make_accusation()
                 if self.char.board.btn_cards.pressed(mouse):
                     self.char.view_cards()
+                if self.char.board.btn_end.pressed(mouse): # End Turn
+                    self.end_turn() 
+
                 for cell in self.char.board.cells:
                     if cell.clicked(mouse):
                         self.make_move(cell.x, cell.y)
