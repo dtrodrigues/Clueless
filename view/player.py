@@ -4,7 +4,7 @@ import pickle
 
 from pgu import gui
 
-import board, notebook, player_selection, suggestion, accusation, card
+import board, notebook, player_selection, suggestion, accusation, card, disprove
 from sector import Sector
 import logic.message as m
 import view.client
@@ -115,12 +115,16 @@ class Character(Suspect):
         
         self.cards = []
         self.opponents = {}
+        self.allPlayers = self.opponents.copy()
+        self.allPlayers[self.name] = self
 
         self.notebook = notebook.Notebook() #self.nb_surface)
 
         self.suggestion = suggestion.Suggestion()
         self.accusation = accusation.Accusation()
         self.viewCards = card.ViewCard(self.cards)
+
+        self.disprove = disprove.Disprove()
 
         self.displayNames()
 
@@ -239,9 +243,9 @@ class ClueGUI:
     
             
     def end_turn(self):
-        d = m.Message(m.TO_SERVER, m.NEXT_TURN, info={'suspect': view.client.guiToServ[self.char.name]}, \
-        new_turn = True, comment="end turn")
-        # self.client.connection.sendLine(pickle.dumps(d))
+        d = m.Message(m.TO_SERVER, m.END_TURN, info={'suspect': view.client.guiToServ[self.char.name]})
+        self.client.connection.sendLine(pickle.dumps(d))
+        #new_turn = True, comment="end turn")
 	# Not sure if this is the right thing to do here.  But here is your end_turn function.
 
     def one_lap(self):        

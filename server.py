@@ -114,8 +114,8 @@ class Server():
         elif inbound.typ == m.MAKE_SUGGESTION:
 
             suspect = inbound.info['suspect']
-            #if suspect != self.game.current_player:
-            #    raise Ignore("It is not this player's turn.")
+            if suspect != self.game.current_player:
+                raise Ignore("It is not this player's turn.")
             if suspect in self.game.losers:
                 raise Ignore("This player has lost and cannot suggest.")
 
@@ -124,26 +124,28 @@ class Server():
 
             # send the name of the player to disprove
             # this also updates the state of the board
-            disprove = self.game.check_suggestion(suggestion)
+            disprover, cards, whoCantDisprove = self.game.check_suggestion(suggestion)
 
             info = {}
 
             info['suspect']      = suspect
             info['suggestion']   = suggestion
-            info['can_disprove'] = disprove
+            info['disprover'] = disprover
+            info['cards'] = cards
+            info['whoCantDisprove'] = whoCantDisprove
             info['board']        = self.game.pickle_board()
 
             # no one can disprove
-            if not disprove:
+            if not disprover:
 
                 # then it's someone elses turn now
-                new_suspect = self.game.next_turn()
+                #new_suspect = self.game.next_turn()
 
                 outbound = m.Message(
                     direction   = m.FROM_SERVER,
                     typ         = m.MADE_SUGGESTION,
                     info        = info,
-                    new_turn    = new_suspect,
+                    #new_turn    = new_suspect, accusation can be made after a suggestion
                     comment     = "Suggestion was made and can't be disproved."
                 )
 
@@ -212,15 +214,17 @@ class Server():
         # disproval
         elif inbound.typ == m.DISPROVE: 
 
-            suspect = inbound.info['suspect']
+            shower = inbound.info['shower']
             card    = inbound.info['card']
+            showTo = inbound.info['showTo']
 
             # next turn here
             new_suspect = self.game.next_turn()
 
             info = {}
-            info['suspect'] = suspect
-            info['card']    = card
+            info['shower'] = shower
+            info['card']   = card
+            info['showTo'] = showTo
 
             outbound = m.Message(
                 direction   = m.FROM_SERVER,
@@ -230,6 +234,13 @@ class Server():
                 comment     = "Suggestion was disproved by suspect using card."
             )
 
+        # player ends their turn
+        elif inbound.typ == m.END_TURN:
+
+            new_suspect = self.game.next_turn()
+
+            outbound = m.Message(direction = m.FROM_SERVER,
+                    typ = m.TURN_ENDED, new_turn = new_suspect)
 
 
         # erroneous input

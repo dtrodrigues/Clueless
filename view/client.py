@@ -1,5 +1,6 @@
 import pickle
 import logic.message as m
+import card
 from view.player import Character
 from logic.game import Board
 
@@ -41,7 +42,10 @@ class Client():
                 self.madeMoveReceived(mes)
             elif mes.typ == m.MADE_SUGGESTION:
                 self.suggestionReceived(mes)
-                print "somebody made a suggestion"
+            elif mes.typ == m.TURN_ENDED:
+                self.turnEnded(mes)
+            elif mes.typ == m.WAS_DISPROVED:
+                self.wasDisproved(mes)
             else:
                 print "message direction %d type %d is not handled" % (mes.direction, mes.typ)
 
@@ -57,6 +61,7 @@ class Client():
         self.allPlayers = [servToGui[x] for x in players]
         self.opps = filter(lambda x: x != self.name, self.allPlayers)
         self.char.setOpponents(self.opps)
+        print "current turn: " + servToGui[mes.new_turn]
 
     def madeMoveReceived(self, mes):
         newBoard = pickle.loads(mes.info['board'])
@@ -65,8 +70,99 @@ class Client():
             self.char.opponents[p].updateLocation(newX, newY)
 
     def suggestionReceived(self, mes):
+        # update board
         newBoard = pickle.loads(mes.info['board'])
-        for p in self.opps:
+        disprover, cards, whoCantDisprove = mes.info['disprover'], mes.info['cards'], mes.info['whoCantDisprove']
+        cards = map(lambda x: servToGui[x], cards)
+        suggester = mes.info['suspect']
+        
+        print self.char.allPlayers
+        for p in self.char.allPlayers:
             newX, newY = newBoard.find_player(guiToServ[p])
-            self.char.opponents[p].updateLocation(newX, newY)
+            self.char.allPlayers[p].updateLocation(newX, newY)
+
+        # print messages for players who cannot disprove
+        
+
+        if disprover:
+            for plyr in whoCantDisprove:
+                print "%s cannot disprove the suggestion of %s" % (plyr, suggester)
+
+            print disprover + " can disprove the suggestion; waiting for them to disprove"
+            if servToGui[disprover] == self.char.name:
+                print "please select a card to disprove the suggestion with from %s" % str(cards)
+                self.char.disprove.create(map(card.Card, cards))
+                cardShown = self.char.disprove.choice_value.name
+                print "you have shown " + cardShown + " to " + suggester
+                d = m.Message(m.TO_SERVER, m.DISPROVE, info={'showTo': suggester, 'card': cardShown, 'shower': self.char.name})
+                self.connection.sendLine(pickle.dumps(d))
+
+
+
+
+
+        # else somebody can disprove
+        # if you made the suggestion: print out the players who cant disprove and say "waiting for x to disprove"
+        # if you 
+
+        # if you made the suggestion and nobody can disprove it, print out all players
+        # and say its the next persons turn
+
+        # if somebo
+
+        # nobody can disprove
+        else:
+            print "who cant disprove: " + str(whoCantDisprove)
+            for plyr in whoCantDisprove:
+                print "%s cannot disprove the suggestion of %s" % (plyr, suggester)
+            # its your suggestion
+            if servToGui[suggester] == self.char.name:
+                print "nobody can disprove your suggestion. make an accusation or end your turn."
+
+            # its somebody else's suggestion
+            else:
+                print "nobody can disprove the suggestion of " + suggester
+
+
+        # if nobody can disprove
+        #   if you made suggestion: print out all players and inform you that your suggestion went unproven
+        #       prompt you to make an accusation or end turn
+        #   if somebody else made suggestion: print out all other players
+
+    def wasDisproved(self, mes):
+        nextp = servToGui[mes.new_turn]
+        showTo = mes.info['showTo']
+        shower = mes.info['shower']
+        card = mes.info['card']
+        
+        # you are being shown the card
+        if servToGui[showTo] == self.char.name:
+            print shower + " has shown you the " + card + " card"
+            print "your turn is now over"
+
+        # you are showing the card
+        elif shower == self.char.name:
+            pass
+
+        # you are neither the shower or the showee
+        else:
+            print shower + " has shown a card to " + showTo
+
+        if nextp == self.char.name:
+            print "it is now your turn"
+        else:
+            print "it is now the turn of " + nextp
+
+        
+
+
+    def turnEnded(self, mes):        
+        nextP = servToGui[mes.new_turn]
+        if nextP == self.char.name:
+            print "it's your turn"
+            # check if there are valid moves
+            print "make a move"
+        else:
+            print "it's %s's turn" % mes.new_turn
+
 

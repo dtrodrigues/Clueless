@@ -14,6 +14,7 @@ MADE_SUGGESTION = 4
 LOST_GAME       = 6
 WON_GAME        = 7
 WAS_DISPROVED   = 8
+TURN_ENDED      = 9
 
 START_GAME      = 19
 ADD_ME          = 20
@@ -21,6 +22,7 @@ MAKE_MOVE       = 21
 MAKE_SUGGESTION = 22
 MAKE_ACCUSATION = 23
 DISPROVE        = 24
+END_TURN        = 25
 
 ERROR           = 99
 

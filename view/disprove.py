@@ -4,16 +4,17 @@ from pgu import gui
 
 
 class Disprove():
-    def __init__(self, cards, screen = None):
-        self.cards = cards
+    def __init__(self, screen = None):
         
         self.screen = screen
         self.WIDTH = 400
         self.HEIGHT = 400
 
-        self.choice_value = self.cards[0]
         
-    def create(self):
+    def create(self, cards):
+        self.cards = cards
+
+        self.choice_value = self.cards[0]
         
         self.app = gui.Desktop()
         self.container = gui.Container(width=600, height=600)

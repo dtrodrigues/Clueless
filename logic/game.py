@@ -150,27 +150,48 @@ exception if the game is over. Returns True on success.'''
 
 
     def who_can_disprove(self,suggestion):
+        """ returns a 3-tuple of the player who can disprove the suggestion (or False),
+        the cards they can use to disprove the suggestion (or None), and a list of players
+        who can't disprove the suggestion"""
+
+        print "player list is " + str(self.playerlist)
 
         current = 0
         for x in range(self.numplayers):
+            print "for iter"
             if self.playerlist[x].suspect == self.current_player:
                 current = x
+                print str(current) + " is current"
                 break
 
-        x = 0
-        while(x < self.numplayers-1):
+
+        canDisprove = False
+        disproveCards = []
+        whoCantDisprove = []
+
+        # we care about all players except the suggester
+        for x in range(self.numplayers - 1):
 
             current = (current + 1) % self.numplayers
+            print "current in loop is " + str(current)
             for card in self.playerlist[current].cards:
                 if card in suggestion:
-                    return self.playerlist[current].suspect
+                    canDisprove = True
+                    disproveCards += [card]
+                    disprover = self.playerlist[current].suspect
+                    print "disprover is " +  disprover
 
-            # otherwise, continue
-            x += 1
-            continue
+            if canDisprove:
+                print disprover, disproveCards, whoCantDisprove
+                return disprover, disproveCards, whoCantDisprove
+            else:
+                whoCantDisprove += [self.playerlist[current].suspect]
+
+
 
         # no one can disprove
-        return False 
+        print whoCantDisprove
+        return False, disproveCards, whoCantDisprove
 
 #
 #   UPDATE PLAYER POSITION

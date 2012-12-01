@@ -44,8 +44,11 @@ TO_SERVER types
 		info['accusation'] = tuple(room,suspect,weapon)
 	DISPROVE
 		indicates the card that is being used to disprove
-		info['suspect'] = name of disproving suspect
+		info['shower'] = name of disproving suspect
 		info['card']	= name of card being used to disprove
+        info['showTo'] = name of person who card is being shown to
+    END_TURN
+        info['suspect'] = name of suspect ending turn
 
 FROM_SERVER types
 	START
@@ -81,11 +84,16 @@ FROM_SERVER types
 		indicates a player made a suggestion
 		info['suspect'] = name of the suspect that made the suggestion
 		info['suggestion'] = the suggestion that was made tuple(room,suspect,weapon)
-		info['can_disprove'] = suspect name or False -- if false, the suggestion can't be disproved
+		info['disprover'] = suspect name or False -- if false, the suggestion can't be disproved
 		info['board'] = pickle of the updated board
+        info['whoCantDisprove'] = list of players who can't disprove the suggestion
+        info['cards'] = the cards the disprover can use
 	WAS_DISPROVED
-		info['suspect'] = the suspect who disproved
+        info['showTo'] = the suspect who suggested 
+		info['shower'] = the suspect who disproved
 		info['card']	= the card used to disprove 
+    TURN_ENDED
+        new player is in mes.new_turn
 
 I'm trying to make these messages as minimal as possible so that we don't have to send very much information. So, for example,
 the LOST_GAME message should be enough to indicate to all players what the accusation was, should indicate to the accusing player
