@@ -36,7 +36,10 @@ class Client():
     def handle_action(self, line):
         mes = pickle.loads(line)
         if mes.direction == m.FROM_SERVER:
-            if mes.typ == m.START:
+            if mes.typ == m.ADD_PLAYER:
+                #add player behavior goes here
+                pass
+            elif mes.typ == m.START:
                 self.startReceived(mes)
             elif mes.typ == m.MADE_MOVE:
                 self.madeMoveReceived(mes)
