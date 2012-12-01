@@ -43,7 +43,7 @@ class Accusation():
         self.weapon = gui.Select(value = 'candlestick')
         self.weapon.add("Candlestick", 'candlestick')
         self.weapon.add("Knife", 'knife')
-        self.weapon.add("Lead Pipe", 'lead_pipe')
+        self.weapon.add("Lead Pipe", 'lead')
         self.weapon.add("Revolver", 'revolver')
         self.weapon.add("Rope", 'rope')
         self.weapon.add("Wrench", 'wrench')
