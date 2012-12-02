@@ -26,14 +26,14 @@ class GameServerProtocol(basic.LineReceiver):
         
     def lineReceived(self, line):
         """Called whenever a message is received from a client"""
-        #peer = self.transport.getPeer()
-        #log.msg('Message received from {0}:{1}'.format(peer.host, 
-        #                                                   peer.port))
+        peer = self.transport.getPeer()
+        log.msg('Message received from {0}:{1}'.format(peer.host, 
+                                                           peer.port))
         #for player in self.players:
         #    player.sendMessage(message)
-        #print line    
+        print line    
         response = self.factory.game.invoke(line)
-        #print response
+        print response
         for player in self.players:
             player.sendLine(response)
 
