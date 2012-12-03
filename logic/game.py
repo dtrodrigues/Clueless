@@ -154,14 +154,14 @@ exception if the game is over. Returns True on success.'''
         the cards they can use to disprove the suggestion (or None), and a list of players
         who can't disprove the suggestion"""
 
-        print "player list is " + str(self.playerlist)
+        #print "player list is " + str(self.playerlist)
 
         current = 0
         for x in range(self.numplayers):
-            print "for iter"
+            #print "for iter"
             if self.playerlist[x].suspect == self.current_player:
                 current = x
-                print str(current) + " is current"
+                #print str(current) + " is current"
                 break
 
 
@@ -173,16 +173,16 @@ exception if the game is over. Returns True on success.'''
         for x in range(self.numplayers - 1):
 
             current = (current + 1) % self.numplayers
-            print "current in loop is " + str(current)
+            #print "current in loop is " + str(current)
             for card in self.playerlist[current].cards:
                 if card in suggestion:
                     canDisprove = True
                     disproveCards += [card]
                     disprover = self.playerlist[current].suspect
-                    print "disprover is " +  disprover
+                    #print "disprover is " +  disprover
 
             if canDisprove:
-                print disprover, disproveCards, whoCantDisprove
+                #print disprover, disproveCards, whoCantDisprove
                 return disprover, disproveCards, whoCantDisprove
             else:
                 whoCantDisprove += [self.playerlist[current].suspect]
@@ -190,7 +190,7 @@ exception if the game is over. Returns True on success.'''
 
 
         # no one can disprove
-        print whoCantDisprove
+        #print whoCantDisprove
         return False, disproveCards, whoCantDisprove
 
 #
