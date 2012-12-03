@@ -37,6 +37,7 @@ class Client():
         mes = pickle.loads(line)
         if mes.direction == m.FROM_SERVER:
             if mes.typ == m.ADD_PLAYER:
+                self.playerAdded(mes)
                 #add player behavior goes here
                 pass
             elif mes.typ == m.START:
@@ -52,7 +53,13 @@ class Client():
             else:
                 print "message direction %d type %d is not handled" % (mes.direction, mes.typ)
 
+    def playerAdded(self,mes):
+        newPlayer = mes.info['suspect']
+        if servToGui[newPlayer] != self.char.name:
+            print newPlayer + " has joined the game."
+
     def startReceived(self, mes):
+        print "The game has begun."
         cards = mes.info[guiToServ[self.name]]
         newCards = []
         for card in cards:
