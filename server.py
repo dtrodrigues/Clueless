@@ -201,6 +201,11 @@ class Server():
                 # suspect
                 new_suspect = self.game.next_turn()
 
+                # this means there are no more suspects and the game is over
+                if suspect == new_suspect:
+                    info['gameover'] = True
+                    new_suspect = ""
+
                 outbound = m.Message(
                     direction   = m.FROM_SERVER,
                     typ         = m.LOST_GAME,
@@ -250,8 +255,7 @@ class Server():
 
         # this will provide the list of available moves for the next player
         if outbound.new_turn:
-            outbound.info['moves'] = \
-                self.game.board.available_moves(outbound.new_turn)
+            outbound.info['moves'] = self.game.board.available_moves(outbound.new_turn)
 
 
         # last step for everybody
