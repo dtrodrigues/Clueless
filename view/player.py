@@ -176,13 +176,11 @@ class Character(Suspect):
 
 
     def make_accusation(self):
-        if self.location.pos in self.board.rooms.keys():
-            self.accusation.create()
-            suspect = self.accusation.suspect.value
-            weapon = self.accusation.weapon.value
-            room = self.accusation.room.value
-        else:
-            print "You must be in a room to make an accusation"
+        self.accusation.create()
+        suspect = self.accusation.suspect.value
+        weapon = self.accusation.weapon.value
+        room = self.accusation.room.value
+        return suspect, weapon, room
 
     def view_cards(self):
         self.viewCards.create()
@@ -238,9 +236,16 @@ class ClueGUI:
         succ, room, suspect, weapon = self.char.make_suggestion()
         if succ:
             d = m.Message(m.TO_SERVER, m.MAKE_SUGGESTION,
-                    info={"suspect": view.client.guiToServ[self.char.name], "suggestion": tuple(map(lambda x: view.client.guiToServ[x],[room, suspect, weapon]))})
+                    info={"suspect": view.client.guiToServ[self.char.name], "suggestion": tuple([room] + map(lambda x: view.client.guiToServ[x],[suspect, weapon]))})
             self.client.connection.sendLine(pickle.dumps(d))
-    
+
+    def make_accusation(self):
+        suspect, weapon, room = self.char.make_accusation()
+
+        d = m.Message(m.TO_SERVER, m.MAKE_ACCUSATION,
+                info={"suspect": view.client.guiToServ[self.char.name], "accusation": tuple([room] + map(lambda x: view.client.guiToServ[x],[suspect, weapon]))})
+        self.client.connection.sendLine(pickle.dumps(d))
+
             
     def end_turn(self):
         d = m.Message(m.TO_SERVER, m.END_TURN, info={'suspect': view.client.guiToServ[self.char.name]})
@@ -287,7 +292,8 @@ class ClueGUI:
                     self.make_suggestion()
                     #self.char.make_suggestion()
                 if self.char.board.btn_accuse.pressed(mouse): # Make an Accusation
-                    self.char.make_accusation()
+                    self.make_accusation()
+                    #self.char.make_accusation()
                 if self.char.board.btn_cards.pressed(mouse):
                     self.char.view_cards()
                 if self.char.board.btn_end.pressed(mouse): # End Turn

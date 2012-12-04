@@ -49,7 +49,7 @@ class Server():
                 typ       = m.START,
                 info      = info,
                 new_turn  = self.game.current_player,
-                comment   = "Game is beginning. Dealing cards to players."
+                comment   = "Game is beginning. Dealing cards to players. Solution is " + str(self.game.solution_cards)
             )
 
 
