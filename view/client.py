@@ -50,6 +50,10 @@ class Client():
                 self.turnEnded(mes)
             elif mes.typ == m.WAS_DISPROVED:
                 self.wasDisproved(mes)
+            elif mes.typ == m.WON_GAME:
+                self.wonGame(mes)
+            elif mes.typ == m.LOST_GAME:
+                self.lostGame(mes)
             else:
                 print "message direction %d type %d is not handled" % (mes.direction, mes.typ)
 
@@ -86,7 +90,6 @@ class Client():
         cards = map(lambda x: servToGui[x], cards)
         suggester = mes.info['suspect']
         
-        print self.char.allPlayers
         for p in self.char.allPlayers:
             newX, newY = newBoard.find_player(guiToServ[p])
             self.char.allPlayers[p].updateLocation(newX, newY)
@@ -174,5 +177,42 @@ class Client():
             print "make a move"
         else:
             print "it's %s's turn" % mes.new_turn
+
+
+    def wonGame(self, mes):
+        accusation = mes.info['accusation']
+        suspect = mes.info['suspect']
+        print suspect + " has made the accusation of " + str(accusation)
+
+        #update board
+        newBoard = pickle.loads(mes.info['board'])
+        for p in self.char.allPlayers:
+            newX, newY = newBoard.find_player(guiToServ[p])
+            self.char.allPlayers[p].updateLocation(newX, newY)
+
+        print "checking accusation"
+        if servToGui[suspect] == self.char.name:
+            print "Congratulations. You have won the game"
+        else:
+            print suspect + " has won the game!"
+        print "The game is over"
+
+    def lostGame(self, mes):
+        accusation = mes.info['accusation']
+        suspect = mes.info['suspect']
+        print suspect + " has made the accusation of " + str(accusation)
+        print "checking accusation"
+        if servToGui[suspect] == self.char.name:
+            print "Your accusation is incorrect. You have lost the game."
+        else:
+            print suspect + " has made an incorrect accusation. They have lost the game."
+
+        #update board
+        newBoard = pickle.loads(mes.info['board'])
+        for p in self.char.allPlayers:
+            newX, newY = newBoard.find_player(guiToServ[p])
+            self.char.allPlayers[p].updateLocation(newX, newY)
+
+        self.turnEnded(mes)
 
 

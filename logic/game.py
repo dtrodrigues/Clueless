@@ -247,7 +247,7 @@ coordinate. Returns True on success, False otherwise.'''
         self.board.move_player_to_room(suspect,room)
         self.board.move_weapon_to_room(suspect,room)
 
-        if suggestion == self.solution_cards:
+        if accusation == self.solution_cards:
             return True
         else:
             return False
@@ -354,7 +354,7 @@ class Deck():
         r = self.rooms.pop()
         s = self.suspects.pop()
         w = self.weapons.pop()
-
+        
         return (r,s,w)
 
     def return_all_shuffled(self):
