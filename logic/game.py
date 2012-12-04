@@ -449,8 +449,9 @@ class Board():
             if i in self.not_spaces:
                 continue
 
-            # make sure that space isn't occupied if it's a room
-            if self.rooms.has_key(i):
+            # make sure that space isn't occupied if it's a hallway (not a
+            # room)
+            if not self.rooms.has_key(i)
                 for key in self.player_positions.keys():
                     if self.player_positions[key] == i:
                         occupied = True
