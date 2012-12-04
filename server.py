@@ -248,6 +248,12 @@ class Server():
             raise ServerError("Unknown inbound message type.")
 
 
+        # this will provide the list of available moves for the next player
+        if outbound.new_turn:
+            outbound.info['moves'] = \
+                self.game.board.available_moves(outbound.new_turn)
+
+
         # last step for everybody
         outbound = pickle.dumps(outbound)
         return outbound
