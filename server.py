@@ -245,7 +245,7 @@ class Server():
             new_suspect = self.game.next_turn()
 
             outbound = m.Message(direction = m.FROM_SERVER,
-                    typ = m.TURN_ENDED, new_turn = new_suspect)
+                    typ = m.TURN_ENDED, info={}, new_turn = new_suspect)
 
 
         # erroneous input
