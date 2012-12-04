@@ -408,14 +408,61 @@ class Board():
                                  "Professor Plum":(0,1)
                                 }
 
-    def find_player(self,player):
+    def find_player(self,suspect):
         for x in self.player_positions.keys():
-            if x == player:
+            if x == suspect:
                 return self.player_positions[x]
 
         # error if you get to here
         raise NoSuchPlayerError()
 
+
+    def available_moves(self,suspect):
+
+        x,y = self.find_player(suspect)
+        candidates = [(x+1,y),(x,y+1),(x-1,y),(x,y-1)]
+
+        # what if there's a secret passage?
+        if (x,y) == (0,0):
+            candidates += [(4,4)]
+        if (x,y) == (4,4):
+            candidates += [(0,0)]
+        if (x,y) == (4,0):
+            candidates += [(0,4)]
+        if (x,y) == (0,4):
+            candidates += [(4,0)]
+
+
+        available = []
+
+        for i in candidates:
+
+            occupied = False
+
+            # make sure the coordinate is on the board
+            if (i[0] > self.max_xy) or (i[1] > self.max_xy):
+                continue
+            if (i[0] < self.min_xy) or (i[1] < self.min_xy):
+                continue
+
+            # make sure it's actually a space
+            if i in self.not_spaces:
+                continue
+
+            # make sure that space isn't occupied if it's a room
+            if self.rooms.has_key(i):
+                for key in self.player_positions.keys():
+                    if self.player_positions[key] == i:
+                        occupied = True
+                        break
+
+            if occupied:
+                continue
+
+            # otherwise, I guess it's a good space
+            available += [i]
+
+        return available
 
 
     def update_player_position(self,player,coordinate):
