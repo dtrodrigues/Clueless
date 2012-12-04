@@ -95,6 +95,11 @@ FROM_SERVER types
     TURN_ENDED
         new player is in mes.new_turn
 
+
+    **New 12/3
+	Whenever mes.new_turn is set, info['moves'] will be an array containing the moves available to that player. If info['moves'] is empty, 
+	then the player forfeits their turn.
+
 I'm trying to make these messages as minimal as possible so that we don't have to send very much information. So, for example,
 the LOST_GAME message should be enough to indicate to all players what the accusation was, should indicate to the accusing player
 that they lost, and should have the new_turn parameter set so that the next turn can proceed. Does this make sense?
