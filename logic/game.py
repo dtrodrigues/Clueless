@@ -227,6 +227,7 @@ coordinate. Returns True on success, False otherwise.'''
 
         # move suspected player to the correct room
         self.board.move_player_to_room(suspect,room)
+        self.board.move_weapon_to_room(weapon,room)
 
         return self.who_can_disprove(suggestion)
 
@@ -244,6 +245,7 @@ coordinate. Returns True on success, False otherwise.'''
 
         # move the accused suspect to the correct room
         self.board.move_player_to_room(suspect,room)
+        self.board.move_weapon_to_room(suspect,room)
 
         if suggestion == self.solution_cards:
             return True
@@ -408,6 +410,15 @@ class Board():
                                  "Professor Plum":(0,1)
                                 }
 
+        # and this reflects the start position of each weapon
+        self.weapon_positions = {"Candlestick":(0,0)
+                                 "Dagger":(0,2)
+                                 "Lead Pipe":(0,4)
+                                 "Rope":(2,0)
+                                 "Revolver":(4,0)
+                                 "Wrench":(4,2)
+                                }
+
     def find_player(self,suspect):
         for x in self.player_positions.keys():
             if x == suspect:
@@ -491,6 +502,18 @@ be updated and raises InvalidMoveError otherwise. Updates the board accordingly.
                 return True
 
         # if you get here, it's not a room
+        return False
+
+
+    def move_weapon_to_room(self,weapon,room)
+
+        coord = ()
+        for x in self.rooms.keys():
+            if self.rooms[x] == room:
+                self.weapon_positions[weapon] = x
+                return True
+
+        # if you get here, it's not a weapon
         return False
 
 
