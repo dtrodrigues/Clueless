@@ -411,11 +411,11 @@ class Board():
                                 }
 
         # and this reflects the start position of each weapon
-        self.weapon_positions = {"Candlestick":(0,0)
-                                 "Dagger":(0,2)
-                                 "Lead Pipe":(0,4)
-                                 "Rope":(2,0)
-                                 "Revolver":(4,0)
+        self.weapon_positions = {"Candlestick":(0,0),
+                                 "Dagger":(0,2),
+                                 "Lead Pipe":(0,4),
+                                 "Rope":(2,0),
+                                 "Revolver":(4,0),
                                  "Wrench":(4,2)
                                 }
 
@@ -462,7 +462,7 @@ class Board():
 
             # make sure that space isn't occupied if it's a hallway (not a
             # room)
-            if not self.rooms.has_key(i)
+            if not self.rooms.has_key(i):
                 for key in self.player_positions.keys():
                     if self.player_positions[key] == i:
                         occupied = True
@@ -505,7 +505,7 @@ be updated and raises InvalidMoveError otherwise. Updates the board accordingly.
         return False
 
 
-    def move_weapon_to_room(self,weapon,room)
+    def move_weapon_to_room(self,weapon,room):
 
         coord = ()
         for x in self.rooms.keys():
