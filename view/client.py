@@ -75,7 +75,7 @@ class Client():
         self.allPlayers = [servToGui[x] for x in players]
         self.opps = filter(lambda x: x != self.name, self.allPlayers)
         self.char.setOpponents(self.opps)
-        print "current turn: " + servToGui[mes.new_turn]
+        print "Current turn: " + servToGui[mes.new_turn]
 
     def madeMoveReceived(self, mes):
         newBoard = pickle.loads(mes.info['board'])
@@ -101,12 +101,12 @@ class Client():
             for plyr in whoCantDisprove:
                 print "%s cannot disprove the suggestion of %s" % (plyr, suggester)
 
-            print disprover + " can disprove the suggestion; waiting for them to disprove"
+            print disprover + " can disprove the suggestion; waiting for them to disprove."
             if servToGui[disprover] == self.char.name:
-                print "please select a card to disprove the suggestion with from %s" % str(cards)
+                print "Please select a card to disprove the suggestion with from %s" % str(cards)
                 self.char.disprove.create(map(card.Card, cards))
                 cardShown = self.char.disprove.choice_value.name
-                print "you have shown " + cardShown + " to " + suggester
+                print "You have shown " + guiToServ[cardShown] + " to " + suggester
                 d = m.Message(m.TO_SERVER, m.DISPROVE, info={'showTo': suggester, 'card': cardShown, 'shower': self.char.name})
                 self.connection.sendLine(pickle.dumps(d))
 
@@ -125,16 +125,16 @@ class Client():
 
         # nobody can disprove
         else:
-            print "who cant disprove: " + str(whoCantDisprove)
+#            print "who cant disprove: " + str(whoCantDisprove)
             for plyr in whoCantDisprove:
                 print "%s cannot disprove the suggestion of %s" % (plyr, suggester)
             # its your suggestion
             if servToGui[suggester] == self.char.name:
-                print "nobody can disprove your suggestion. make an accusation or end your turn."
+                print "Nobody can disprove your suggestion. Make an accusation or end your turn."
 
             # its somebody else's suggestion
             else:
-                print "nobody can disprove the suggestion of " + suggester
+                print "Nobody can disprove the suggestion of " + suggester
 
 
         # if nobody can disprove
@@ -150,8 +150,8 @@ class Client():
         
         # you are being shown the card
         if servToGui[showTo] == self.char.name:
-            print shower + " has shown you the " + card + " card"
-            print "your turn is now over"
+            print guiToServ[shower] + " has shown you the " + guiToServ[card] + " card"
+            print "Your turn is now over."
 
         # you are showing the card
         elif shower == self.char.name:
@@ -159,12 +159,14 @@ class Client():
 
         # you are neither the shower or the showee
         else:
-            print shower + " has shown a card to " + showTo
+            print guiToServ[shower] + " has shown a card to " + showTo + "."
 
         if nextp == self.char.name:
-            print "it is now your turn"
+            print "It's your turn."
+            # check if there are valid moves
+            print "Make a move."
         else:
-            print "it is now the turn of " + nextp
+            print "It's now the turn of " + guiToServ[nextp]
 
         
 
@@ -172,11 +174,12 @@ class Client():
     def turnEnded(self, mes):        
         nextP = servToGui[mes.new_turn]
         if nextP == self.char.name:
-            print "it's your turn"
+            print "It's your turn."
             # check if there are valid moves
-            print "make a move"
+            print "Make a move."
         else:
-            print "it's %s's turn" % mes.new_turn
+#            print "It's %s's turn" % mes.new_turn
+            print "It's now the turn of " + mes.new_turn + "."
 
 
     def wonGame(self, mes):
@@ -190,18 +193,18 @@ class Client():
             newX, newY = newBoard.find_player(guiToServ[p])
             self.char.allPlayers[p].updateLocation(newX, newY)
 
-        print "checking accusation"
+        print "Checking accusation."
         if servToGui[suspect] == self.char.name:
-            print "Congratulations. You have won the game"
+            print "Congratulations! You have won the game!"
         else:
             print suspect + " has won the game!"
-        print "The game is over"
+        print "The game is over."
 
     def lostGame(self, mes):
         accusation = mes.info['accusation']
         suspect = mes.info['suspect']
         print suspect + " has made the accusation of " + str(accusation)
-        print "checking accusation"
+        print "Checking accusation"
         if servToGui[suspect] == self.char.name:
             print "Your accusation is incorrect. You have lost the game."
         else:
