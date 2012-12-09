@@ -97,19 +97,21 @@ class Client():
         # print messages for players who cannot disprove
         
 
+        sug = mes.info['suggestion']
+        print "The suggestion is " + str(sug[1]) + " in the " + str(sug[0]) + " with the " + str(sug[2]) + "."
+
         if disprover:
             for plyr in whoCantDisprove:
                 print "%s cannot disprove the suggestion of %s" % (plyr, suggester)
 
             print disprover + " can disprove the suggestion; waiting for them to disprove."
             if servToGui[disprover] == self.char.name:
-                print "Please select a card to disprove the suggestion with from %s" % str(cards)
+                #print "Please select a card to disprove the suggestion with from %s" % str(cards)
                 self.char.disprove.create(map(card.Card, cards))
                 cardShown = self.char.disprove.choice_value.name
                 print "You have shown " + guiToServ[cardShown] + " to " + suggester
                 d = m.Message(m.TO_SERVER, m.DISPROVE, info={'showTo': suggester, 'card': cardShown, 'shower': self.char.name})
                 self.connection.sendLine(pickle.dumps(d))
-
 
 
 
