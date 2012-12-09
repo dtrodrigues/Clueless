@@ -29,9 +29,9 @@ class Accusation():
         
         self.room = gui.Select(value = 'Ballroom')
         self.room.add("Ballroom", 'Ballroom')
-        self.room.add("Billiard Room", 'Billiard_room')
+        self.room.add("Billiard Room", 'Billiard Room')
         self.room.add("Conservatory", 'Conservatory')
-        self.room.add("Dining Room", 'Dining_room')
+        self.room.add("Dining Room", 'Dining Room')
         self.room.add("Hall", 'Hall')
         self.room.add("Kitchen", 'Kitchen')
         self.room.add("Library", 'Library')

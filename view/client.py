@@ -187,7 +187,8 @@ class Client():
     def wonGame(self, mes):
         accusation = mes.info['accusation']
         suspect = mes.info['suspect']
-        print suspect + " has made the accusation of " + str(accusation)
+        print suspect + " has made the accusation of " + accusation[1] + " in the " + accusation[0] + " with the " + accusation[2] + "."
+#        str(accusation)
 
         #update board
         newBoard = pickle.loads(mes.info['board'])
@@ -205,7 +206,7 @@ class Client():
     def lostGame(self, mes):
         accusation = mes.info['accusation']
         suspect = mes.info['suspect']
-        print suspect + " has made the accusation of " + str(accusation)
+        print suspect + " has made the accusation of " + accusation[1] + " in the " + accusation[0] + " with the " + accusation[2] + "."
         print "Checking accusation"
         if servToGui[suspect] == self.char.name:
             print "Your accusation is incorrect. You have lost the game."
