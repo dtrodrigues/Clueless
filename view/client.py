@@ -75,7 +75,7 @@ class Client():
         self.allPlayers = [servToGui[x] for x in players]
         self.opps = filter(lambda x: x != self.name, self.allPlayers)
         self.char.setOpponents(self.opps)
-        print "Current turn: " + servToGui[mes.new_turn]
+        print "It is now the turn of " + mes.new_turn + "."
 
     def madeMoveReceived(self, mes):
         newBoard = pickle.loads(mes.info['board'])
