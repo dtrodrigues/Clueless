@@ -1,8 +1,6 @@
 Twisted==12.2.0
 distribute==0.6.24
-nose==1.2.1
 pgu==0.18
 pygame==1.9.1release
-simplejson==2.6.2
 wsgiref==0.1.2
 zope.interface==4.0.1
