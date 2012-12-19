@@ -229,7 +229,7 @@ coordinate. Returns True on success, False otherwise.'''
         self.board.move_player_to_room(suspect,room)
         self.board.move_weapon_to_room(weapon,room)
 
-        return self.who_can_disprove(suggestion)#, suggestion
+        return self.who_can_disprove(suggestion)
 
 
 

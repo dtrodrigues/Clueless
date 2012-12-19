@@ -3,20 +3,14 @@
 import pygame, sys
 from pgu import gui
 
-class Suggestion():
-    def __init__(self, screen = None):
+class Suggestion(gui.Dialog):
+    def __init__(self):
 
-        self.screen = screen
-        self.WIDTH = 400
-        self.HEIGHT = 400
+        self.title = gui.Label("Make a Suggestion")
+        self.sgt_table = gui.Container(width=100, height=150)
+        self.label = gui.Label("Suggest a suspect, room, and weapon.")
+        self.sgt_table.add(self.label, 0,0)
 
-    def create(self, room):
-        
-        self.app = gui.Desktop()
-        self.container = gui.Container(width=400, height=400)
-        
-        self.app.connect(gui.QUIT, self.app.quit, None)
-        
         self.suspect = gui.Select(value = 'green')
         self.suspect.add("Mr. Green", 'green')
         self.suspect.add("Colonel Mustard", 'mustard')
@@ -24,31 +18,37 @@ class Suggestion():
         self.suspect.add("Professor Plum", 'plum')
         self.suspect.add("Miss Scarlet", 'scarlet')
         self.suspect.add("Mrs. White", 'white')
+       
+        self.sgt_table.add(self.suspect,0,25)
         
-        self.container.add(self.suspect, 25,250)
-        
-        self.room = gui.Select(value = room)
-        self.room.add(room, room)
-        
-        self.container.add(self.room, 300, 250)
+        self.room = gui.Select(value = "Ballroom")
+        self.room.add("Ballroom", "Ballroom")
+       
+        self.sgt_table.add(self.room,0,50)
         
         self.weapon = gui.Select(value = 'candlestick')
         self.weapon.add("Candlestick", 'candlestick')
         self.weapon.add("Knife", 'knife')
-        self.weapon.add("Lead Pipe", 'lead')
+        self.weapon.add("Lead Pipe", 'lead_pipe')
         self.weapon.add("Revolver", 'revolver')
         self.weapon.add("Rope", 'rope')
         self.weapon.add("Wrench", 'wrench')
-        
-        self.container.add(self.weapon, 675, 250)
+       
+        self.sgt_table.add(self.weapon,0,75)
         
         self.suggest_btn = gui.Button("Make Suggestion")
-        self.suggest_btn.connect(gui.CLICK, self.app.quit, None) 
-        
-        self.container.add(self.suggest_btn, 370,300)
+        self.suggest_btn.connect(gui.CLICK, self.close) 
+       
+        self.sgt_table.add(self.suggest_btn,0,125)
 
-        self.start()
 
-    def start(self):
-        self.app.run(self.container)
+    def create(self, room):
+        self.sgt_table.remove(self.room)
+        self.room = gui.Select(value = room)
+        self.room.add(room,room)
+        self.sgt_table.add(self.room,0,50) 
+
+        gui.Dialog.__init__(self, self.title, self.sgt_table)
+        self.open()
+
         

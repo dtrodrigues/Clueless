@@ -3,23 +3,17 @@ from pygame.locals import *
 from pgu import gui
 
 
-class Disprove():
-    def __init__(self, screen = None):
-        
-        self.screen = screen
-        self.WIDTH = 400
-        self.HEIGHT = 400
+class Disprove(gui.Dialog):
+    def __init__(self):
+       
+        self.title = gui.Label("Disprove the Suggestion") 
 
-        
     def create(self, cards):
         self.cards = cards
 
         self.choice_value = self.cards[0]
         
-        self.app = gui.Desktop()
         self.container = gui.Container(width=600, height=600)
-        
-        self.app.connect(gui.QUIT, self.app.quit, None)
         
         self.msg = gui.Label("Choose a card to disprove the suggestion.")
         
@@ -38,12 +32,12 @@ class Disprove():
                 y += 200
         
         self.show_btn = gui.Button("Show Card")
-        self.show_btn.connect(gui.CLICK, self.app.quit, None) 
+        self.show_btn.connect(gui.CLICK, self.close) 
         
         self.container.add(self.show_btn, 470,500)
 
-        self.start()
 
     def start(self):
-        self.app.run(self.container)
+        gui.Dialog.__init__(self, self.title, self.container)
+        self.open()
 

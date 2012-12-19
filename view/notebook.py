@@ -3,19 +3,13 @@
 import pygame, sys
 from pgu import gui
 
-class Notebook():
-    def __init__(self, screen = None):
+class Notebook(gui.Dialog):
+    def __init__(self):
 
-        self.screen = screen
-        self.WIDTH = 400
-        self.HEIGHT = 640
+	self.title = gui.Label("Detective's Notebook")
 
-        self.app = gui.Desktop()
-
-        self.app.connect(gui.QUIT, self.app.quit, None)
-
-        self.c = gui.Table(width=400, height=640)
-        
+        self.container = gui.Container(width=400, height=640)
+       
         self.green_val = 'u'
         self.mustard_val = 'u'
         self.peacock_val = 'u'
@@ -40,12 +34,25 @@ class Notebook():
         self.rope_val = 'u'
         self.wrench_val = 'u'
         
-#        self.app.run(self.c)
-
         self.display_notebook()
+        
+    def create_notebook(self):
+        self.container.add(gui.Label("Detective's Notebook"), 200, 0)
+        self.container.add(gui.Label("Suspect"), 10, 50)
+        self.container.add(gui.Label("No"), 200, 50)
+        self.container.add(gui.Label("Yes"), 250, 50)
+        self.container.add(gui.Label("Unknown"), 350, 50)
+                
+        self.exit_btn = gui.Button("Exit")
+        self.exit_btn.connect(gui.CLICK, self.close) 
+        
+        self.container.add(self.exit_btn, 400,350)
+
 
     def display_notebook(self):
         
+        self.c = gui.Table(width=400, height=640)
+       
         self.c.tr()
         self.c.td(gui.Label("Detective's Notebook"), colspan=4)
 
@@ -230,12 +237,14 @@ class Notebook():
         self.c.td(gui.Radio(self.wrench_grp, value='u'))
 
         self.exit_btn = gui.Button("Exit")
-        self.exit_btn.connect(gui.CLICK, self.app.quit, None) 
+        self.exit_btn.connect(gui.CLICK, self.close) 
 
         self.c.tr()
         self.c.td(self.exit_btn)
+        
+        self.container.add(self.c, 0,0)
+        gui.Dialog.__init__(self, self.title, self.container)
 
     def start(self):
-        
-        self.app.run(self.c)
+	self.open()
     

@@ -1,7 +1,8 @@
 import pickle
 import logic.message as m
 import card
-from view.player import Character
+#from view.player import Character
+from player import Character
 from logic.game import Board
 
 
@@ -60,10 +61,13 @@ class Client():
     def playerAdded(self,mes):
         newPlayer = mes.info['suspect']
         if servToGui[newPlayer] != self.char.name:
-            print newPlayer + " has joined the game."
+            msg = newPlayer + " has joined the game."
+            print msg
+            self.char.messages.append(msg)
 
     def startReceived(self, mes):
-        print "The game has begun."
+        msg = "The game has begun."
+        self.char.messages.append(msg)
         cards = mes.info[guiToServ[self.name]]
         newCards = []
         for card in cards:
@@ -75,7 +79,8 @@ class Client():
         self.allPlayers = [servToGui[x] for x in players]
         self.opps = filter(lambda x: x != self.name, self.allPlayers)
         self.char.setOpponents(self.opps)
-        print "It is now the turn of " + mes.new_turn + "."
+        msg = "current turn: " + servToGui[mes.new_turn]
+        self.char.messages.append(msg)
 
     def madeMoveReceived(self, mes):
         newBoard = pickle.loads(mes.info['board'])
@@ -97,21 +102,23 @@ class Client():
         # print messages for players who cannot disprove
         
 
-        sug = mes.info['suggestion']
-        print "The suggestion is " + str(sug[1]) + " in the " + str(sug[0]) + " with the " + str(sug[2]) + "."
-
         if disprover:
             for plyr in whoCantDisprove:
-                print "%s cannot disprove the suggestion of %s" % (plyr, suggester)
+                msg = "%s cannot disprove the suggestion of %s" % (plyr, suggester)
+                self.char.messages.append(msg)
 
-            print disprover + " can disprove the suggestion; waiting for them to disprove."
+            msg = disprover + " can disprove the suggestion; waiting for them to disprove"
+            self.char.messages.append(msg)
             if servToGui[disprover] == self.char.name:
-                #print "Please select a card to disprove the suggestion with from %s" % str(cards)
+                msg = "please select a card to disprove the suggestion with from %s" % str(cards)
+                self.char.messages.append(msg)
                 self.char.disprove.create(map(card.Card, cards))
                 cardShown = self.char.disprove.choice_value.name
-                print "You have shown " + guiToServ[cardShown] + " to " + suggester
+                msg = "you have shown " + cardShown + " to " + suggester
+                self.char.messages.append(msg)
                 d = m.Message(m.TO_SERVER, m.DISPROVE, info={'showTo': suggester, 'card': cardShown, 'shower': self.char.name})
                 self.connection.sendLine(pickle.dumps(d))
+
 
 
 
@@ -127,16 +134,20 @@ class Client():
 
         # nobody can disprove
         else:
-#            print "who cant disprove: " + str(whoCantDisprove)
+            msg = "who cant disprove: " + str(whoCantDisprove)
+            self.char.messages.append(msg)
             for plyr in whoCantDisprove:
-                print "%s cannot disprove the suggestion of %s" % (plyr, suggester)
+                msg = "%s cannot disprove the suggestion of %s" % (plyr, suggester)
+                self.char.messages.append(msg)
             # its your suggestion
             if servToGui[suggester] == self.char.name:
-                print "Nobody can disprove your suggestion. Make an accusation or end your turn."
+                msg = "nobody can disprove your suggestion. make an accusation or end your turn."
+                self.char.messages.append(msg)
 
             # its somebody else's suggestion
             else:
-                print "Nobody can disprove the suggestion of " + suggester
+                msg = "nobody can disprove the suggestion of " + suggester
+                self.char.messages.append(msg)
 
 
         # if nobody can disprove
@@ -152,8 +163,10 @@ class Client():
         
         # you are being shown the card
         if servToGui[showTo] == self.char.name:
-            print guiToServ[shower] + " has shown you the " + guiToServ[card] + " card"
-            print "Your turn is now over."
+            msg = shower + " has shown you the " + card + " card"
+            self.char.messages.append(msg)
+            msg = "your turn is now over"
+            self.char.messages.append(msg)
 
         # you are showing the card
         elif shower == self.char.name:
@@ -161,14 +174,15 @@ class Client():
 
         # you are neither the shower or the showee
         else:
-            print guiToServ[shower] + " has shown a card to " + showTo + "."
+            msg = shower + " has shown a card to " + showTo
+            self.char.messages.append(msg)
 
         if nextp == self.char.name:
-            print "It's your turn."
-            # check if there are valid moves
-            print "Make a move."
+            msg = "it is now your turn"
+            self.char.messages.append(msg)
         else:
-            print "It's now the turn of " + guiToServ[nextp]
+            msg = "it is now the turn of " + nextp
+            self.char.messages.append(msg)
 
         
 
@@ -176,19 +190,21 @@ class Client():
     def turnEnded(self, mes):        
         nextP = servToGui[mes.new_turn]
         if nextP == self.char.name:
-            print "It's your turn."
+            msg = "it's your turn"
+            self.char.messages.append(msg)
             # check if there are valid moves
-            print "Make a move."
+            msg = "make a move"
+            self.char.messages.append(msg)
         else:
-#            print "It's %s's turn" % mes.new_turn
-            print "It's now the turn of " + mes.new_turn + "."
+            msg = "it's %s's turn" % mes.new_turn
+            self.char.messages.append(msg)
 
 
     def wonGame(self, mes):
         accusation = mes.info['accusation']
         suspect = mes.info['suspect']
-        print suspect + " has made the accusation of " + accusation[1] + " in the " + accusation[0] + " with the " + accusation[2] + "."
-#        str(accusation)
+        msg = suspect + " has made the accusation of " + str(accusation)
+        self.char.messages.append(msg)
 
         #update board
         newBoard = pickle.loads(mes.info['board'])
@@ -196,22 +212,30 @@ class Client():
             newX, newY = newBoard.find_player(guiToServ[p])
             self.char.allPlayers[p].updateLocation(newX, newY)
 
-        print "Checking accusation."
+        msg = "checking accusation"
+        self.char.messages.append(msg)
         if servToGui[suspect] == self.char.name:
-            print "Congratulations! You have won the game!"
+            msg = "Congratulations. You have won the game"
+            self.char.messages.append(msg)
         else:
-            print suspect + " has won the game!"
-        print "The game is over."
+            msg = suspect + " has won the game!"
+            self.char.messages.append(msg)
+        msg = "The game is over"
+        self.char.messages.append(msg)
 
     def lostGame(self, mes):
         accusation = mes.info['accusation']
         suspect = mes.info['suspect']
-        print suspect + " has made the accusation of " + accusation[1] + " in the " + accusation[0] + " with the " + accusation[2] + "."
-        print "Checking accusation"
+        msg = suspect + " has made the accusation of " + str(accusation)
+        self.char.messages.append(msg)
+        msg = "checking accusation"
+        self.char.messages.append(msg)
         if servToGui[suspect] == self.char.name:
-            print "Your accusation is incorrect. You have lost the game."
+            msg = "Your accusation is incorrect. You have lost the game."
+            self.char.messages.append(msg)
         else:
-            print suspect + " has made an incorrect accusation. They have lost the game."
+            msg = suspect + " has made an incorrect accusation. They have lost the game."
+            self.char.messages.append(msg)
 
         #update board
         newBoard = pickle.loads(mes.info['board'])

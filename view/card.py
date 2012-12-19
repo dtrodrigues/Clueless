@@ -8,20 +8,12 @@ class Card():
         self.image_name = "view/images/cards/" + name + "_card.png"
         self.image = pygame.image.load(self.image_name)
         
-class ViewCard():
-    def __init__(self, cards, screen = None):
+class ViewCard(gui.Dialog):
+    def __init__(self, cards):
         self.cards = cards
         
-        self.screen = screen
-        self.WIDTH = 400
-        self.HEIGHT = 400
-        
-    def create(self):
-        
-        self.app = gui.Desktop()
+        self.title = gui.Label("Cards")
         self.container = gui.Container(width=600, height=600)
-        
-        self.app.connect(gui.QUIT, self.app.quit, None)
         
         x = 0
         y = 5
@@ -33,14 +25,14 @@ class ViewCard():
                 y = 200
         
         self.exit_btn = gui.Button("Exit")
-        self.exit_btn.connect(gui.CLICK, self.app.quit, None) 
+        self.exit_btn.connect(gui.CLICK, self.close) 
         
         self.container.add(self.exit_btn, 470,500)
 
-        self.start()
 
     def start(self):
-        self.app.run(self.container)
+        gui.Dialog.__init__(self, self.title, self.container)
+        self.open()
 
 
 

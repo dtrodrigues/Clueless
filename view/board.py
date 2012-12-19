@@ -6,7 +6,6 @@ from pgu import gui
 import time
 from pygame.locals import *
 
-import button
 from sector import *
 
 # Some constants
@@ -26,18 +25,18 @@ ROOMHEIGHT = 128
 HALLWIDTH = 88
 HALLHEIGHT = 88
 
-ROOMOFFSET_X = 80
-ROOMOFFSET_Y = 60
-HALLOFFSET_X = 100
-HALLOFFSET_Y = 80
+ROOMOFFSET_X = 10
+ROOMOFFSET_Y = 10
+HALLOFFSET_X = 30
+HALLOFFSET_Y = 30
 
 
 class Board:
-    def __init__(self):
+    def __init__(self, screen):
         pygame.init()
         
         pygame.display.set_caption('Clued-In')
-        self.screen = pygame.display.set_mode((1000,750), pygame.DOUBLEBUF)
+        self.screen = screen
         GAMEOVER = False
         
         self.background = pygame.Surface(self.screen.get_size())
@@ -46,14 +45,6 @@ class Board:
         self.screen.blit(self.background, (0,0))
         pygame.display.flip()
         
-        self.btn_notebook = button.Button('button_notebook')
-        self.btn_suggest = button.Button('button_suggest')
-        self.btn_accuse = button.Button('button_accuse')
-        self.btn_cards = button.Button('button_cards')
-        self.btn_end = button.Button('button_end')
-        self.btn_exit = button.Button('button_close')
-               
-
         self.cells = []
         
         self.rooms = {(0,0):"Study",
@@ -67,10 +58,10 @@ class Board:
                       (4,4):"Kitchen"
                      }
         
-        self.ShowMap()
+        self.showMap()
         
                
-    def ShowSplash(self):
+    def showSplash(self):
         splashImg = pygame.image.load('view/images/splash_screen.png')
         
         self.screen.blit(splashImg, (50,50))
@@ -78,7 +69,8 @@ class Board:
         time.sleep(2)
         
             
-    def ShowMap(self):
+    def showMap(self):
+#        self.screen = screen
         for x in range(0,5):
             for y in range(0,5):
                 passage = False
@@ -118,42 +110,19 @@ class Board:
         # clear the screen first
                 
         for cell in self.cells:
-            
             pygame.draw.rect(self.background, cell.color, cell.rectangle, 0)
             self.background.blit(cell.text, cell.rectangle)
             if cell.hasPassage:
                 pygame.draw.rect(self.background, (0,0,0), cell.pRectangle, 0)
                 self.background.blit(cell.pText, cell.pRectangle)
-        
-        
-        # Add event buttons button
-        self.btn_notebook.setCords(ROOMWIDTH * 6.5, ROOMHEIGHT * 2.5)
-        self.btn_suggest.setCords(ROOMWIDTH * 6.5, ROOMHEIGHT * 3)
-        self.btn_accuse.setCords(ROOMWIDTH * 6.5, ROOMHEIGHT * 3.5)
-        self.btn_cards.setCords(ROOMWIDTH * 6.5, ROOMHEIGHT * 4)
-        self.btn_end.setCords(ROOMWIDTH * 6.5, ROOMHEIGHT * 4.5)
-        self.btn_exit.setCords(ROOMWIDTH * 6.5, ROOMHEIGHT * 5)
-        
-        self.background.blit(self.btn_notebook.image, self.btn_notebook.rect.topleft)
-        self.background.blit(self.btn_suggest.image, self.btn_suggest.rect.topleft)
-        self.background.blit(self.btn_accuse.image, self.btn_accuse.rect.topleft)
-        self.background.blit(self.btn_cards.image, self.btn_cards.rect.topleft)
-        self.background.blit(self.btn_end.image, self.btn_end.rect.topleft)
-        self.background.blit(self.btn_exit.image, self.btn_exit.rect.topleft)
-        pygame.display.flip()
-        
         self.screen.blit( self.background, (0,0) )
         pygame.display.flip()
-        
         
 class Quit(gui.Button):
     def __init__(self, **params):
         params['value'] = 'Quit'
         gui.Button.__init__(self,**params)
         self.connect(gui.CLICK, app.quit, None)
-
-
-
 
 
 def main():                

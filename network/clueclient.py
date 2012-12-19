@@ -5,7 +5,8 @@ from twisted.internet import protocol
 from twisted.internet.task import LoopingCall
 
 from view.client import Client
-from view.player import ClueGUI
+#from view.clueGui import ClueGUI
+from view.gamerunner import ClueGui
 
 class GameClientProtocol(basic.LineReceiver):
 
@@ -78,8 +79,12 @@ def run_client():
     from twisted.internet import reactor
     host, port = parse_args()
     factory = GameClientFactory()
-    clueGui = ClueGUI()
+#   clueGui = ClueGUI()
+    clueGui = ClueGui()
     startGame, plyr, char = clueGui.initiate_game()
+#   startGame = clueGui.app.startValue
+#   plyr = clueGui.app.playerName
+#   char = clueGui.app.char
     client = Client(plyr, char, startGame)
     factory.client = client
     clueGui.client = client
